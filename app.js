@@ -910,87 +910,159 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sharePdfBtn = document.getElementById('sharePdfBtn');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    
-    // Core PDF Generation Pipeline
-    const generateAndProcessPDF = async (actionType) => {
-        if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
-            alert('PDF 렌더링 모듈을 불러오는 중입니다. 잠시 후 1~2초 뒤에 다시 시도해 주세요.');
-            return;
-        }
 
-        const btnToUpdate = actionType === 'share' ? sharePdfBtn : downloadPdfBtn;
-        const originalText = btnToUpdate.innerHTML;
-        btnToUpdate.innerHTML = '<span style="font-size: 1.1rem; margin-right: 5px;">⏳</span> PDF 문서 구성 중...';
-        btnToUpdate.disabled = true;
+    // Shared state for generated PDF blob
+    let _pdfBlob = null;
+    let _pdfFileName = null;
 
-        setTimeout(async () => {
-            try {
-                // Focus styling for clean PDF export
-                const elementToCapture = document.querySelector('.container') || document.body;
-                
-                const noPrintElements = document.querySelectorAll('.no-print');
-                noPrintElements.forEach(el => el.style.display = 'none');
-                
-                if (sigCanvas) {
-                    sigCanvas.style.border = 'none';
-                    sigCanvas.style.background = 'transparent';
-                }
-
-                const canvasMap = await html2canvas(elementToCapture, {
-                    scale: 1.5,  // Optimized for faster speed and memory
-                    useCORS: true,
-                    backgroundColor: '#ffffff',
-                    allowTaint: true, // Help bypass file:// protocol security restrictions
-                    logging: false
-                });
-
-                // Restore styling
-                noPrintElements.forEach(el => el.style.display = '');
-                if (sigCanvas) {
-                    sigCanvas.style.border = '1.5px dashed #ccc';
-                    sigCanvas.style.background = '#fafafa';
-                }
-
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                const imgData = canvasMap.toDataURL('image/jpeg', 0.95);
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = (canvasMap.height * pdfWidth) / canvasMap.width;
-                
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-                const fileNameDate = new Date().toISOString().slice(0,10);
-                const customFileName = `HASNOL_전자계약__${fileNameDate}.pdf`;
-
-                if (navigator.share && navigator.canShare) {
-                    const blob = pdf.output('blob');
-                    const file = new File([blob], customFileName, { type: 'application/pdf' });
-                    
-                    if (navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: 'HASNOL 프리미엄 바닥매트 전자계약서',
-                            text: '전자서명이 완료된 하스놀 시공 계약서 및 견적서입니다.'
-                        });
-                    } else {
-                        pdf.save(customFileName);
-                        alert(`📄 기기에 저장되었습니다: ${customFileName}`);
-                    }
-                } else {
-                    // Desktop / Force Download Mode
-                    pdf.save(customFileName);
-                    alert(`✅ [전자계약보관 완료]\n${customFileName} 파일이 기기에 다운로드되었습니다.\n(참고: 현재 접근하신 PC 환경에서는 웹 공유 API가 제한되어 원터치 다운로드 처리되었습니다)`);
-                }
-            } catch (error) {
-                console.error("PDF Generate Error", error);
-                alert("전자문서 변환 중 보안 권한 문제(CORS)가 발생했습니다. 브라우저 대신 직접 '문서 PDF 저장/출력' 버튼을 눌러주세요. 오류 내용: " + error.message);
-            } finally {
-                btnToUpdate.innerHTML = originalText;
-                btnToUpdate.disabled = false;
-            }
-        }, 150);
+    // Helper: trigger file download from blob
+    const downloadBlobFile = (blob, fileName) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
     };
 
-    if (sharePdfBtn) sharePdfBtn.addEventListener('click', () => generateAndProcessPDF('share'));
+    // Core PDF Generation — returns { blob, fileName }
+    const buildPDFBlob = async (triggerBtn) => {
+        if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+            alert('PDF 렌더링 모듈을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+            return null;
+        }
+
+        const originalText = triggerBtn.innerHTML;
+        triggerBtn.innerHTML = '<span style="font-size:1.1rem;margin-right:5px;">⏳</span> PDF 구성 중...';
+        triggerBtn.disabled = true;
+
+        return new Promise((resolve) => {
+            setTimeout(async () => {
+                try {
+                    const elementToCapture = document.querySelector('.container') || document.body;
+                    const noPrintElements = document.querySelectorAll('.no-print');
+                    noPrintElements.forEach(el => el.style.display = 'none');
+                    if (sigCanvas) {
+                        sigCanvas.style.border = 'none';
+                        sigCanvas.style.background = 'transparent';
+                    }
+
+                    const canvasMap = await html2canvas(elementToCapture, {
+                        scale: 1.5, useCORS: true, backgroundColor: '#ffffff',
+                        allowTaint: true, logging: false
+                    });
+
+                    noPrintElements.forEach(el => el.style.display = '');
+                    if (sigCanvas) {
+                        sigCanvas.style.border = '1.5px dashed #ccc';
+                        sigCanvas.style.background = '#fafafa';
+                    }
+
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgData = canvasMap.toDataURL('image/jpeg', 0.95);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (canvasMap.height * pdfWidth) / canvasMap.width;
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+                    const fileNameDate = new Date().toISOString().slice(0, 10);
+                    const fileName = `HASNOL_견적서_${fileNameDate}.pdf`;
+                    const blob = pdf.output('blob');
+
+                    resolve({ blob, fileName });
+                } catch (error) {
+                    console.error('PDF Generate Error', error);
+                    alert('PDF 생성 중 오류가 발생했습니다: ' + error.message);
+                    resolve(null);
+                } finally {
+                    triggerBtn.innerHTML = originalText;
+                    triggerBtn.disabled = false;
+                }
+            }, 150);
+        });
+    };
+
+    // Share Modal Logic
+    const shareModal = document.getElementById('shareOptionsModal');
+    const closeShareModal = document.getElementById('closeShareModal');
+
+    const openShareModal = () => { shareModal.style.display = 'flex'; };
+    const closeModal = () => { shareModal.style.display = 'none'; };
+
+    if (closeShareModal) closeShareModal.addEventListener('click', closeModal);
+    shareModal.addEventListener('click', (e) => { if (e.target === shareModal) closeModal(); });
+
+    // 📱 시스템 공유 (navigator.share — 모바일에서 카톡/문자/드라이브 자동 연결)
+    document.getElementById('shareNativeBtn').addEventListener('click', async () => {
+        closeModal();
+        if (!_pdfBlob || !_pdfFileName) return;
+        const file = new File([_pdfBlob], _pdfFileName, { type: 'application/pdf' });
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: 'HASNOL 하스놀 견적서',
+                    text: '하스놀 AI 맞춤 견적서입니다.'
+                });
+            } catch (e) {
+                if (e.name !== 'AbortError') alert('공유 중 오류: ' + e.message);
+            }
+        } else {
+            downloadBlobFile(_pdfBlob, _pdfFileName);
+            alert('✅ PDF가 저장되었습니다.\n(이 환경에서는 시스템 공유가 지원되지 않아 다운로드 처리되었습니다)');
+        }
+    });
+
+    // 💬 문자 보내기
+    document.getElementById('shareSMSBtn').addEventListener('click', () => {
+        closeModal();
+        if (!_pdfBlob || !_pdfFileName) return;
+        downloadBlobFile(_pdfBlob, _pdfFileName);
+        setTimeout(() => {
+            const msg = encodeURIComponent('HASNOL 견적서를 공유합니다. 다운로드된 PDF 파일을 첨부해주세요.');
+            const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+            window.location.href = isMobile ? `sms:?&body=${msg}` : `sms:?body=${msg}`;
+        }, 800);
+    });
+
+    // 💛 카카오톡
+    document.getElementById('shareKakaoBtn').addEventListener('click', () => {
+        closeModal();
+        if (!_pdfBlob || !_pdfFileName) return;
+        downloadBlobFile(_pdfBlob, _pdfFileName);
+        setTimeout(() => {
+            const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = 'kakaotalk://';
+            } else {
+                alert('✅ PDF가 저장되었습니다.\n카카오톡 PC 버전 또는 모바일 앱에서 파일을 첨부하여 전송해주세요.');
+            }
+        }, 800);
+    });
+
+    // 📁 구글 드라이브
+    document.getElementById('shareDriveBtn').addEventListener('click', () => {
+        closeModal();
+        if (!_pdfBlob || !_pdfFileName) return;
+        downloadBlobFile(_pdfBlob, _pdfFileName);
+        setTimeout(() => {
+            window.open('https://drive.google.com/drive/my-drive', '_blank');
+            alert('✅ PDF가 저장되었습니다.\n구글 드라이브에서 "+ 새로 만들기 → 파일 업로드"로 업로드해주세요.');
+        }, 800);
+    });
+
+    // 📤 스마트 기기 PDF 공유 버튼
+    if (sharePdfBtn) {
+        sharePdfBtn.addEventListener('click', async () => {
+            const result = await buildPDFBlob(sharePdfBtn);
+            if (!result) return;
+            _pdfBlob = result.blob;
+            _pdfFileName = result.fileName;
+            openShareModal();
+        });
+    }
+
+    // 🖨️ 문서 PDF 저장/출력 버튼
     if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => window.print());
 });
