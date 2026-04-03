@@ -105,8 +105,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners - Assigned before logic starts to ensure reliability
     if (calculateBtn) calculateBtn.addEventListener('click', () => {
-        activePresetQty600 = null; // Manual calculation requested
-        presetBtns.forEach(b => b.classList.remove('active'));
+        // Only clear preset if manual space dimensions are actually entered
+        const hasManualData = Array.from(document.querySelectorAll('.space-item')).some(item => {
+            const w = parseFloat(item.querySelector('.space-width').value);
+            const h = parseFloat(item.querySelector('.space-height').value);
+            return w > 0 && h > 0;
+        });
+        if (hasManualData) {
+            activePresetQty600 = null;
+            presetBtns.forEach(b => b.classList.remove('active'));
+        }
         calculateEstimate();
     });
     if (customerNameIpt) customerNameIpt.addEventListener('input', updateContract);
@@ -472,16 +480,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (contractTotal) contractTotal.textContent = finalPrice.toLocaleString();
 
         // Breakdown Info Section
-        infoBasePrice.textContent = baseTotal.toLocaleString();
-        infoSpecialDiscount.textContent = systemDiscountTotal.toLocaleString();
-        infoAddDiscount.textContent = extraDiscountTotal.toLocaleString();
-        infoInstallFee.textContent = totalFees.toLocaleString();
-        infoFinalPrice.textContent = finalPrice.toLocaleString();
+        if (infoBasePrice) infoBasePrice.textContent = baseTotal.toLocaleString();
+        if (infoSpecialDiscount) infoSpecialDiscount.textContent = systemDiscountTotal.toLocaleString();
+        if (infoAddDiscount) infoAddDiscount.textContent = extraDiscountTotal.toLocaleString();
+        if (infoInstallFee) infoInstallFee.textContent = totalFees.toLocaleString();
+        if (infoFinalPrice) infoFinalPrice.textContent = finalPrice.toLocaleString();
 
-        if (totalFees > 0) installFeeRow.style.display = 'block';
-        else installFeeRow.style.display = 'none';
+        if (installFeeRow) {
+            if (totalFees > 0) installFeeRow.style.display = 'block';
+            else installFeeRow.style.display = 'none';
+        }
 
-        contractTotal.textContent = finalPrice.toLocaleString();
+        if (contractTotal) contractTotal.textContent = finalPrice.toLocaleString();
 
         // --- Standardized Calculation Helper for Multi-Size Comparison ---
         function getComputedPrice(sizeIn, typeIn, spacesArray) {
