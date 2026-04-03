@@ -179,9 +179,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Attach click events to specification tabs
-    document.querySelectorAll('.spec-tab').forEach(tab => {
+    document.querySelectorAll('.spec-tab, .res-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             selectModel(tab.dataset.size, tab.dataset.type);
+            
+            // Sync all related tabs
+            document.querySelectorAll('.spec-tab, .res-tab, .size-btn').forEach(t => {
+                if (t.dataset.size === tab.dataset.size && t.dataset.type === tab.dataset.type) {
+                    t.classList.add('active');
+                } else if (t.classList.contains('size-btn')) {
+                    // size-btn doesn't use data-size usually, it matches by text
+                    if (t.innerText.includes(tab.dataset.size)) {
+                         if (tab.dataset.type === 'leather' && t.innerText.includes('레더')) t.classList.add('active');
+                         else if (tab.dataset.type === 'standard' && !t.innerText.includes('레더')) t.classList.add('active');
+                         else t.classList.remove('active');
+                    } else {
+                        t.classList.remove('active');
+                    }
+                } else {
+                    t.classList.remove('active');
+                }
+            });
         });
     });
 
@@ -793,7 +811,121 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(planContainer);
     }
 
-    // --- Official Certification Data (Crawled from hasnol.kr) ---
+    // --- Price Comparison Table Logic ---
+    function updateFullPricingComparison() {
+        const tableContainer = document.getElementById('fullPricingComparison');
+        if (!tableContainer) return;
+
+        const sizes = [
+            { size: '600', type: 'standard', name: '600 표준' },
+            { size: '800', type: 'standard', name: '800 표준' },
+            { size: '800', type: 'leather', name: '800 레더' },
+            { size: '1000', type: 'leather', name: '1000 레더' },
+            { size: '1200', type: 'leather', name: '1200 레더' }
+        ];
+
+        // Get current space data
+        const currentSpaces = [];
+        document.querySelectorAll('.space-item').forEach(item => {
+            const w = parseFloat(item.querySelector('.space-width').value);
+            const h = parseFloat(item.querySelector('.space-height').value);
+            if (w > 0 && h > 0) currentSpaces.push({ w, h });
+        });
+
+        if (currentSpaces.length === 0 && !activePresetQty600) {
+            tableContainer.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">견적을 입력하시면 규격별 비교 데이터가 출력됩니다.</p>';
+            return;
+        }
+
+        let html = `
+            <table style="width:100%; border-collapse: collapse; font-size: 0.85rem; text-align: center; border: 1px solid #eee;">
+                <thead style="background: #f8faff;">
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <th style="padding: 12px 10px;">모델</th>
+                        <th style="padding: 12px 10px;">수량</th>
+                        <th style="padding: 12px 10px;">단가</th>
+                        <th style="padding: 12px 10px;">총 예상견적</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        sizes.forEach(s => {
+            const data = getComputedPrice(s.size, s.type, currentSpaces);
+            const isSelected = matSizeSel.value === s.size && matTypeSel.value === s.type;
+            
+            html += `
+                <tr style="border-bottom: 1px solid #f8f8fa; ${isSelected ? 'background: #f0f4ff; font-weight: 700;' : ''}">
+                    <td style="padding: 12px 10px; font-weight: 700;">${s.name}</td>
+                    <td style="padding: 12px 10px;">${data.qty}장</td>
+                    <td style="padding: 12px 10px;">${data.unitProm.toLocaleString()}원</td>
+                    <td style="padding: 12px 10px; color: var(--primary); font-weight: 800;">${data.total.toLocaleString()}원</td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+        tableContainer.innerHTML = html;
+    }
+
+    // Wrap the original calculateEstimate to include our new table update
+    const baseCalculateEstimate = calculateEstimate;
+    calculateEstimate = function() {
+        baseCalculateEstimate();
+        updateFullPricingComparison();
+    };
+
+    // Helper to get computed price for any size/type combination
+    function getComputedPrice(sizeIn, typeIn, spacesArray) {
+        const sizeKeyIn = sizeIn.toString();
+        const typeKeyIn = typeIn;
+        const sizeCmIn = parseFloat(sizeKeyIn) / 10;
+        const pricesIn = pricingMatrix[sizeKeyIn][typeKeyIn] || [0, 0];
+        const [orig, prom] = pricesIn;
+
+        let sTotalQty = 0;
+        if (activePresetQty600) {
+            let scaleFactor = 1.0;
+            if (sizeKeyIn === '800') scaleFactor = 0.56;
+            else if (sizeKeyIn === '1000') scaleFactor = 0.36;
+            else if (sizeKeyIn === '1200') scaleFactor = 0.25;
+            sTotalQty = Math.ceil(activePresetQty600 * scaleFactor);
+        } else {
+            spacesArray.forEach(sp => {
+                const c = Math.ceil(sp.w / sizeCmIn);
+                const r = Math.ceil(sp.h / sizeCmIn);
+                sTotalQty += (c * r);
+            });
+        }
+
+        // Apply same discount logic as main engine
+        let unitDiscount = parseInt(groupPurchaseTier.value || 0) + 
+                           parseInt(extraDiscountTier.value || 0) + 
+                           (reviewCashChk && reviewCashChk.checked ? 1000 : 0);
+        
+        const refCount = parseInt(referralCountIpt.value || 0);
+        const referralDiscountFlat = (parseInt(groupPurchaseTier.value) === 0) ? (refCount * 50000) : 0;
+        const eventDiscountFlat = (reviewEventChk && reviewEventChk.checked ? 30000 : 0);
+        
+        let installFee = 0;
+        if (sTotalQty < 40) installFee = 200000;
+        else if (sTotalQty < 70) installFee = 100000;
+        
+        const deliveryFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
+        
+        const baseTotal = sTotalQty * orig;
+        const systemDiscountTotal = sTotalQty * (orig - prom);
+        const extraDiscountTotal = (sTotalQty * unitDiscount) + referralDiscountFlat + eventDiscountFlat;
+        
+        const finalPrice = Math.max(0, baseTotal - systemDiscountTotal - extraDiscountTotal + installFee + deliveryFee);
+        
+        return { total: finalPrice, qty: sTotalQty, unitProm: prom };
+    }
+
+    // --- Official Certification Data ---
     const certifications = [
         { title: 'SGS 충격흡수 98%', body: '글로벌 안전성 인증', icon: 'shield-check', url: 'https://www.hasnol.kr/certification' },
         { title: 'KOTITI 라돈안심', body: '방사능 안전 테스트 완료', icon: 'wind', url: 'https://www.hasnol.kr/certification' },
@@ -1142,10 +1274,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🖨️ 문서 출력 버튼
+    // 🖨️ 문서 출력 및 저장 버튼
     if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', () => {
-            window.print();
+        downloadPdfBtn.addEventListener('click', async () => {
+            const result = await buildPDFBlob(downloadPdfBtn);
+            if (!result) return;
+            downloadBlobFile(result.blob, result.fileName);
         });
     }
 });

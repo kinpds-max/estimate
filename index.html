@@ -431,14 +431,17 @@
 
       <!-- Result Summary -->
       <section class="card result-section content-width-sync">
-        <h2 style="margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between;">
-          <span><i data-lucide="receipt"></i> 견적 산출 결과</span>
-          <div class="result-size-selector no-print">
-            <button class="size-btn active" onclick="selectModel('600', 'standard')">600</button>
-            <button class="size-btn" onclick="selectModel('800', 'standard')">800</button>
-            <button class="size-btn" onclick="selectModel('800', 'leather')">800 레더</button>
-            <button class="size-btn" onclick="selectModel('1000', 'leather')">1000 레더</button>
-            <button class="size-btn" onclick="selectModel('1200', 'leather')">1200 레더</button>
+        <h2 style="margin-bottom: 25px; display: flex; align-items: center; flex-direction: column; gap: 15px;">
+          <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+            <span><i data-lucide="receipt"></i> 견적 산출 결과</span>
+            <span id="headerModelName" style="font-size: 1.1rem; color: var(--primary); background: #f0f4ff; border: 1.5px solid var(--primary-light); padding: 4px 14px; border-radius: 12px; font-weight: 800;">600 표준 적용 중</span>
+          </div>
+          <div class="result-tabs" style="display: flex; width: 100%; gap: 10px; padding: 5px; background: #f1f3f5; border-radius: 12px;">
+            <button class="res-tab active" data-size="600" data-type="standard">600</button>
+            <button class="res-tab" data-size="800" data-type="standard">800</button>
+            <button class="res-tab" data-size="800" data-type="leather">800레더</button>
+            <button class="res-tab" data-size="1000" data-type="leather">1000레더</button>
+            <button class="res-tab" data-size="1200" data-type="leather">1200레더</button>
           </div>
         </h2>
 
@@ -473,6 +476,14 @@
         </div>
       </section>
 
+      <!-- Size Comparison Table Section -->
+      <section class="card animate-in" id="comparisonTableSection">
+        <h2 style="margin-bottom: 25px;"><i data-lucide="bar-chart-2"></i> 규격별 가격 비교표 (Size Comparison)</h2>
+        <div id="fullPricingComparison" style="overflow-x: auto;">
+          <!-- Populated by JS -->
+        </div>
+        <p style="font-size: 0.75rem; color: #888; margin-top: 15px; text-align: right;">* 실제 시공 시 정밀 실측에 따라 수량이 가감될 수 있습니다.</p>
+      </section>
 
       <!-- AI Certification Vault -->
       <section class="card animate-in"
@@ -497,8 +508,8 @@
         </div>
       </section>
 
-      <!-- TPU Characteristics Section (Relocated below reviews) -->
-      <section class="card animate-in no-print content-width-sync">
+      <!-- TPU Characteristics Section (Moved to Bottom) -->
+      <section class="card animate-in" id="tpuFeaturesSection" style="margin-top: 20px;">
         <h2 style="margin-bottom: 25px;"><i data-lucide="check-circle"></i> HASNOL TPU 매트의 주요 특장점</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
           <div style="padding: 15px; background: #f8faff; border-radius: 12px; border: 1px solid #eef2ff;">

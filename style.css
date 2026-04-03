@@ -112,10 +112,34 @@ h1 {
   transition: all 0.2s;
 }
 
-.size-btn.active {
+.result-size-selector button.active {
   background: var(--primary);
   color: white;
-  box-shadow: 0 4px 10px rgba(10, 84, 247, 0.2);
+  box-shadow: 0 4px 10px rgba(0, 91, 181, 0.2);
+}
+
+.result-tabs .res-tab {
+  flex: 1;
+  padding: 10px 5px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.result-tabs .res-tab.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* AI Certification Vault hover */
+#certVault a:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary) !important;
 }
 
 .size-btn:hover:not(.active) {
