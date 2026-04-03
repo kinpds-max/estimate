@@ -384,24 +384,37 @@
             <div id="comparisonSummaryTable" style="margin-bottom: 25px;">
               <!-- Populated by JS -->
             </div>
+            
+            <!-- AI Sketch & Simulation Section (Restored) -->
+            <div style="margin-bottom: 25px; border-radius: 20px; overflow: hidden; border: 1.5px solid var(--border-color); background: #ffffff; box-shadow: var(--shadow-soft);">
+              <div style="padding: 12px 20px; background: #fcfdfe; border-bottom: 1px solid #f2f2f7; font-weight: 800; font-size: 0.75rem; color: var(--primary); display: flex; justify-content: space-between; align-items: center;">
+                <span>STEP 1 : AI 시공 예상 스케치</span>
+                <span style="font-size: 0.6rem; color: #888; font-weight: 400;">* 선택한 규격에 맞춘 자동 배치도</span>
+              </div>
+              <div id="sketchPad" style="padding: 20px; background: #fff; min-height: 250px; display: flex; align-items: center; justify-content: center; overflow: auto; border-bottom: 1px dashed #eee;">
+                <!-- Canvas simulation rendered via app.js -->
+                <p style="color: #ccc; font-size: 0.8rem;">분석 데이터를 기반으로 스케치를 생성 중입니다...</p>
+              </div>
+              
+              <div style="padding: 12px 20px; background: #fcfdfe; border-bottom: 1px solid #f2f2f7; font-weight: 800; font-size: 0.75rem; color: var(--primary); display: flex; justify-content: space-between; align-items: center;">
+                <span>STEP 2 : AI 실사 시공 프리뷰 (NANO 2.0)</span>
+                <span style="font-size: 0.6rem; color: #888; font-weight: 400;">* 실제 주거 환경을 반영한 렌더링</span>
+              </div>
+              <div style="width: 100%; border-radius: 0;">
+                <img src="assets/hasnol_preview.png" alt="Nano Preview" style="width: 100%; display: block;">
+              </div>
+            </div>
+
             <p style="font-size: 0.85rem; color: var(--text-muted); padding: 15px; background: #f8faff; border-radius: 12px; border: 1px solid #eef2ff;">
               🎨 상시 업데이트되는 AI 분석 엔진이 공간 특성에 맞춰 최적의 배치를 제안합니다.
             </p>
           </div>
 
-          <!-- RIGHT COLUMN: Detailed Card & AI Preview Image -->
+          <!-- RIGHT COLUMN: Detailed Card -->
           <div style="flex: 1; min-width: 380px; width: 0;">
 
             <div id="activeReportGrid" style="margin-bottom: 25px;">
               <!-- Active Detail Card injected here via JS -->
-            </div>
-
-            <!-- Nano 2 AI Preview Image -->
-            <div style="border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-premium); border: 2px solid #eef2ff;">
-              <div style="padding: 12px 20px; background: #f8faff; border-bottom: 1px solid #eef2ff; font-weight: 800; font-size: 0.75rem; color: var(--primary);">
-                PREVIEW : AI 예상 시공 이미지 (NANO 2.0)
-              </div>
-              <img src="assets/hasnol_preview.png" alt="Construction Preview" style="width: 100%; display: block;">
             </div>
           </div>
         </div>
