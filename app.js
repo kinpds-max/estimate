@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const discountAmt = originalPrice - groupPrice;
         discountPerMatIpt.value = discountAmt;
         
-        appliedUnitPriceBox.style.display = 'none';
+        if (appliedUnitPriceBox) appliedUnitPriceBox.style.display = 'none';
         
         // Auto-calculate to update visualizations if values change
         calculateEstimate();
@@ -486,10 +486,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (infoInstallFee) infoInstallFee.textContent = totalFees.toLocaleString();
         if (infoFinalPrice) infoFinalPrice.textContent = finalPrice.toLocaleString();
 
-        if (installFeeRow) {
-            if (totalFees > 0) installFeeRow.style.display = 'block';
-            else installFeeRow.style.display = 'none';
-        }
 
         if (contractTotal) contractTotal.textContent = finalPrice.toLocaleString();
 
