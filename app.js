@@ -942,7 +942,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const elementToCapture = document.querySelector('.container') || document.body;
                     const noPrintElements = document.querySelectorAll('.no-print');
+                    const placeholder = document.getElementById('signPlaceholder');
+                    const isPlaceholderVisible = placeholder && placeholder.style.display !== 'none';
+
                     noPrintElements.forEach(el => el.style.display = 'none');
+                    if (placeholder) placeholder.style.display = 'none';
                     if (sigCanvas) {
                         sigCanvas.style.border = 'none';
                         sigCanvas.style.background = 'transparent';
@@ -950,10 +954,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const canvasMap = await html2canvas(elementToCapture, {
                         scale: 1.5, useCORS: true, backgroundColor: '#ffffff',
-                        allowTaint: true, logging: false
+                        allowTaint: true, logging: false,
+                        onclone: (clonedDoc) => {
+                            // Ensure the signature is visible in the clone
+                            const clonedCanvas = clonedDoc.getElementById('signaturePad');
+                            if (clonedCanvas && sigCanvas) {
+                                const clonedCtx = clonedCanvas.getContext('2d');
+                                clonedCtx.drawImage(sigCanvas, 0, 0);
+                            }
+                        }
                     });
 
                     noPrintElements.forEach(el => el.style.display = '');
+                    if (isPlaceholderVisible && placeholder) placeholder.style.display = 'block';
                     if (sigCanvas) {
                         sigCanvas.style.border = '1.5px dashed #ccc';
                         sigCanvas.style.background = '#fafafa';
@@ -1064,5 +1077,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 🖨️ 문서 PDF 저장/출력 버튼
-    if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', () => window.print());
+    if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', async () => {
+            const result = await buildPDFBlob(downloadPdfBtn);
+            if (!result) return;
+            downloadBlobFile(result.blob, result.fileName);
+            
+            // Note: window.print() is optional here, but direct download is usually preferred for "Save"
+            // If the user also wants to print, they can open the downloaded file.
+            // Or we can add a choice. For now, let's make it actually "Save" to PDF.
+        });
+    }
 });
