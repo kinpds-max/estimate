@@ -650,14 +650,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);">${calculated.unitProm.toLocaleString()}원</span>
                 </div>
 
-                <ul style="border-top: 1px solid #eef2ff; margin-top: 25px; padding-top: 20px; padding-left: 20px; font-size: 0.85rem; color: #444; line-height: 1.8; margin-bottom: 0;">
-                    <li>기본 권장 및 설치 단가: ${calculated.bT.toLocaleString()}원</li>
-                    <li>규격별 특별 프로모션 적용: -${calculated.sD.toLocaleString()}원</li>
-                    <li>
-                        공구/짝궁/후기/혜택 합계: -${calculated.eD.toLocaleString()}원
-                        ${extraDiscountTier.value > 0 ? `<br><span style="color: var(--primary); font-size: 0.75rem; font-weight: 700; display: inline-block; margin-top: 4px;">(✔️ 적용 품목: ${extraDiscountTier.options[extraDiscountTier.selectedIndex].text})</span>` : ''}
-                    </li>
-                </ul>
+                <li>기본 권장 및 설치 단가: ${calculated.bT.toLocaleString()}원</li>
+                <li>규격별 특별 프로모션 적용: -${calculated.sD.toLocaleString()}원</li>
+                <li>
+                    공구/짝궁/후기/혜택 합계: -${calculated.eD.toLocaleString()}원
+                    ${extraDiscountTier.value > 0 ? `<br><span style="color: var(--primary); font-size: 0.75rem; font-weight: 700; display: inline-block; margin-top: 4px;">(✔️ 적용 품목: ${extraDiscountTier.options[extraDiscountTier.selectedIndex].text})</span>` : ''}
+                </li>
+                <li style="color: var(--primary);">수량별 시공 분담금 및 물류비: +${calculated.iF.toLocaleString()}원</li>
+            </ul>
 
                 <div style="background: #f8faff; border-radius: 15px; padding: 25px; margin-top: 25px; border: 1px solid #eef2ff;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -920,8 +920,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const eventDiscountFlat = (reviewEventChk && reviewEventChk.checked ? 30000 : 0);
         
         let installFee = 0;
-        if (sTotalQty < 40) installFee = 200000;
-        else if (sTotalQty < 70) installFee = 100000;
+        if (sizeKeyIn === '600') {
+            if (sTotalQty <= 70) installFee = 100000;
+        } else {
+            // Logic for other sizes (can be adjusted)
+            if (sTotalQty < 40) installFee = 200000;
+            else if (sTotalQty < 70) installFee = 100000;
+        }
         
         const deliveryFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
         
@@ -931,7 +936,16 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const finalPrice = Math.max(0, baseTotal - systemDiscountTotal - extraDiscountTotal + installFee + deliveryFee);
         
-        return { total: finalPrice, qty: sTotalQty, unitProm: prom };
+        return { 
+            total: finalPrice, 
+            qty: sTotalQty, 
+            unitProm: prom,
+            unitOrig: orig,
+            bT: baseTotal,
+            sD: systemDiscountTotal,
+            eD: extraDiscountTotal,
+            iF: installFee + deliveryFee
+        };
     }
 
     // --- Official Certification Data ---
