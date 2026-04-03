@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pricing Data
     const pricingMatrix = {
         '600': { standard: [29000, 25000], leather: [33000, 29000] },
-        '800': { standard: [80000, 47000], leather: [90000, 60000] },
+        '800': { standard: [80000, 47000], leather: [90000, 57000] },
         '1000': { standard: [130000, 95000], leather: [130000, 95000] },
         '1200': { leather: [200000, 150000] } // Leather only as requested
     };
@@ -1166,6 +1166,59 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('clearSignBtn').addEventListener('click', () => {
             ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
             document.getElementById('signPlaceholder').style.display = 'block';
+        });
+    }
+
+    // --- Company Signature Pad (을 / 시공사) ---
+    const sigCanvasCompany = document.getElementById('signaturePadCompany');
+    if (sigCanvasCompany) {
+        const ctx2 = sigCanvasCompany.getContext('2d');
+        let isDrawing2 = false;
+
+        const getPos2 = (e) => {
+            const rect = sigCanvasCompany.getBoundingClientRect();
+            const scaleX = sigCanvasCompany.width / rect.width;
+            const scaleY = sigCanvasCompany.height / rect.height;
+            if (e.touches && e.touches.length > 0) {
+                return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+            }
+            return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+        };
+
+        const startDraw2 = (e) => {
+            isDrawing2 = true;
+            const ph = document.getElementById('signPlaceholderCompany');
+            if (ph) ph.style.display = 'none';
+            ctx2.beginPath();
+            const pos = getPos2(e);
+            ctx2.moveTo(pos.x, pos.y);
+            if (e.cancelable) e.preventDefault();
+        };
+        const drawStroke2 = (e) => {
+            if (!isDrawing2) return;
+            const pos = getPos2(e);
+            ctx2.lineTo(pos.x, pos.y);
+            ctx2.lineWidth = 3;
+            ctx2.lineCap = 'round';
+            ctx2.strokeStyle = '#0f172a';
+            ctx2.stroke();
+            if (e.cancelable) e.preventDefault();
+        };
+        const stopDraw2 = () => { isDrawing2 = false; ctx2.closePath(); };
+
+        sigCanvasCompany.addEventListener('mousedown', startDraw2);
+        sigCanvasCompany.addEventListener('mousemove', drawStroke2);
+        sigCanvasCompany.addEventListener('mouseup', stopDraw2);
+        sigCanvasCompany.addEventListener('mouseout', stopDraw2);
+        sigCanvasCompany.addEventListener('touchstart', startDraw2, {passive: false});
+        sigCanvasCompany.addEventListener('touchmove', drawStroke2, {passive: false});
+        sigCanvasCompany.addEventListener('touchend', stopDraw2);
+
+        const clearBtn2 = document.getElementById('clearSignBtnCompany');
+        if (clearBtn2) clearBtn2.addEventListener('click', () => {
+            ctx2.clearRect(0, 0, sigCanvasCompany.width, sigCanvasCompany.height);
+            const ph = document.getElementById('signPlaceholderCompany');
+            if (ph) ph.style.display = 'block';
         });
     }
 
