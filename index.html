@@ -222,6 +222,22 @@
                     style="font-size: 0.8rem; font-weight: 500; margin-left: 4px; color: #666;">원</small>
                 </div>
               </div>
+              <!-- Row: 600 레더 -->
+              <div
+                style="display: grid; grid-template-columns: 160px 1fr 1.2fr 1fr; padding: 18px 20px; border-bottom: 1px solid #f2f2f7; align-items: center;">
+                <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">600mm <span style="font-size:0.7rem; background:#fff3e0; color:#e67e22; border-radius:4px; padding:1px 6px; margin-left:4px;">레더</span></div>
+                <div style="font-size: 0.9rem; color: #8e8e93;">33,000원</div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                  <input type="number" class="manual-discount" data-size="600" data-type="leather" value="4000"
+                    style="padding: 10px 12px; font-size: 0.95rem; font-weight: 700; color: var(--primary); width: 100px; border-radius: 8px;">
+                  <span style="font-size: 0.8rem; color: #999;">원</span>
+                </div>
+                <div
+                  style="text-align: right; font-weight: 800; font-size: 1.15rem; color: var(--text-main); white-space: nowrap;">
+                  <span class="price-row-final" data-size="600" data-type="leather">29,000</span><small
+                    style="font-size: 0.8rem; font-weight: 500; margin-left: 4px; color: #666;">원</small>
+                </div>
+              </div>
               <!-- Row: 800 Std -->
               <div
                 style="display: grid; grid-template-columns: 160px 1fr 1.2fr 1fr; padding: 18px 20px; border-bottom: 1px solid #f2f2f7; align-items: center;">
@@ -366,6 +382,7 @@
         <div class="analysis-tabs" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 15px; background: #f0f4ff; border-radius: 20px; box-shadow: inset 0 2px 10px rgba(10,84,247,0.05); margin-bottom: 35px;">
           <button class="analysis-tab active" data-id="rec" style="padding: 12px 20px; font-size: 0.85rem;">🛡️ 최적 추천 (Recommended)</button>
           <button class="analysis-tab" data-id="600_std" style="padding: 12px 20px; font-size: 0.85rem;">600</button>
+          <button class="analysis-tab" data-id="600_lea" style="padding: 12px 20px; font-size: 0.85rem;">600 레더</button>
           <button class="analysis-tab" data-id="800_std" style="padding: 12px 20px; font-size: 0.85rem;">800</button>
           <button class="analysis-tab" data-id="800_lea" style="padding: 12px 20px; font-size: 0.85rem;">800 레더</button>
           <button class="analysis-tab" data-id="1000_lea" style="padding: 12px 20px; font-size: 0.85rem;">1000 레더</button>
@@ -411,6 +428,36 @@
 
             <div id="activeReportGrid" style="margin-bottom: 25px;">
               <!-- Active Detail Card injected here via JS -->
+            </div>
+
+            <!-- 맞춰형 시공 추천 후기 -->
+            <div style="border-radius: 20px; overflow: hidden; border: 1.5px solid var(--border-color); background: #fff; box-shadow: var(--shadow-soft);">
+              <div style="padding: 12px 20px; background: #fff9f0; border-bottom: 1px solid #ffe8d0; font-weight: 800; font-size: 0.75rem; color: #e67e22;">
+                ⭐ 맞춰형 시공 추천 후기 (SNS 리얼 데이터)
+              </div>
+              <div id="dynamicReviewsRight" style="padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+                <a href="https://blog.naver.com/hasnol" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px; background:#f8f9fa; border-radius:12px; text-decoration:none; color:var(--text-main); border:1px solid #eee; transition:all 0.2s;" onmouseover="this.style.borderColor='#03C75A'" onmouseout="this.style.borderColor='#eee'">
+                  <span style="font-size:1.5rem;">📗</span>
+                  <div>
+                    <div style="font-weight:700; font-size:0.85rem; color:#03C75A;">네이버 블로그</div>
+                    <div style="font-size:0.75rem; color:#888;">HASNOL TPU 매트 시공 후기 보기</div>
+                  </div>
+                </a>
+                <a href="https://cafe.naver.com/hasnol" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px; background:#f8f9fa; border-radius:12px; text-decoration:none; color:var(--text-main); border:1px solid #eee; transition:all 0.2s;" onmouseover="this.style.borderColor='#03C75A'" onmouseout="this.style.borderColor='#eee'">
+                  <span style="font-size:1.5rem;">☕</span>
+                  <div>
+                    <div style="font-weight:700; font-size:0.85rem; color:#03C75A;">네이버 카페</div>
+                    <div style="font-size:0.75rem; color:#888;">지역별 시공 사례 문의</div>
+                  </div>
+                </a>
+                <a href="https://www.instagram.com/hasnol_official" target="_blank" style="display:flex; align-items:center; gap:12px; padding:12px; background:#f8f9fa; border-radius:12px; text-decoration:none; color:var(--text-main); border:1px solid #eee; transition:all 0.2s;" onmouseover="this.style.borderColor='#E1306C'" onmouseout="this.style.borderColor='#eee'">
+                  <span style="font-size:1.5rem;">📸</span>
+                  <div>
+                    <div style="font-weight:700; font-size:0.85rem; color:#E1306C;">인스타그램</div>
+                    <div style="font-size:0.75rem; color:#888;">실시간 시공 현장 사진</div>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -540,6 +587,10 @@
               <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: #666;">시공 범위: <span id="contractBuyerScope">_________________</span></p>
             </div>
             <div style="text-align: right; position: relative;">
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #888; display: block; margin-bottom: 4px;">담당자</label>
+                <input type="text" id="managerName" placeholder="담당자 이름" style="border: 1.5px solid #eee; border-radius: 8px; padding: 6px 10px; font-size: 0.85rem; width: 160px; text-align: center; font-weight: 600;">
+              </div>
               <p style="margin: 0; font-weight: 700; font-size: 1.1rem; position: relative; z-index: 5;">을 (시공사): HASNOL
                 주식회사 <span style="position: relative; display: inline-block;">(인)
                   <img src="assets/seal.png" alt="Official Seal"
@@ -566,6 +617,9 @@
 
     <footer style="text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.85rem;">
       <p>&copy; 2026 HASNOL Premium Floor Mat. All Rights Reserved.</p>
+      <p style="margin-top: 8px; font-size: 0.75rem; color: #aaa; border-top: 1px solid #eee; padding-top: 12px;">
+        이 프로그램의 저작권은 <strong>하맘콘텐츠</strong>에 있으며, 무단 복제 및 배포 시 민사상 및 형사상 법적 책임을 집니다.
+      </p>
     </footer>
   </div>
 

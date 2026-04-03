@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Pricing Data
     const pricingMatrix = {
-        '600': { standard: [29000, 25000], leather: [29000, 25000] },
+        '600': { standard: [29000, 25000], leather: [33000, 29000] },
         '800': { standard: [80000, 47000], leather: [90000, 60000] },
         '1000': { standard: [130000, 95000], leather: [130000, 95000] },
         '1200': { leather: [200000, 150000] } // Leather only as requested
@@ -570,6 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const modelTiers = {
             'rec': { size: optimalSize, type: optimalType, label: optimalLabel },
             '600_std': { size: '600', type: 'standard', label: 'HASNOL 600 표준' },
+            '600_lea': { size: '600', type: 'leather', label: 'HASNOL 600 레더' },
             '800_std': { size: '800', type: 'standard', label: 'HASNOL 800 표준' },
             '800_lea': { size: '800', type: 'leather', label: 'HASNOL 800 레더' },
             '1000_lea': { size: '1000', type: 'leather', label: 'HASNOL 1000 레더' },
@@ -665,6 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tiers = [
                 { id: '600_std', size: '600', type: 'standard', name: '600 표준' },
+                { id: '600_lea', size: '600', type: 'leather', name: '600 레더' },
                 { id: '800_std', size: '800', type: 'standard', name: '800 표준' },
                 { id: '800_lea', size: '800', type: 'leather', name: '800 레더' },
                 { id: '1000_lea', size: '1000', type: 'leather', name: '1000 레더' },
