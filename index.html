@@ -137,41 +137,6 @@
         </div>
 
         <!-- Professional Recommendation Chips -->
-        <div style="margin-bottom: 25px;">
-          <label
-            style="display: block; font-weight: 700; color: var(--primary); font-size: 0.95rem; margin-bottom: 12px;"><i
-              data-lucide="award"></i> HASNOL 전문가 추천 규격 (Quick Select)</label>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <div class="recommend-chip" onclick="selectModel('800', 'leather')">
-              <span class="badge"
-                style="background: #ffcc00; color: #000; font-size: 0.7rem; border-radius: 4px; padding: 2px 6px; margin-right: 5px;">BEST</span>
-              800 레더 (인기)
-            </div>
-            <div class="recommend-chip" onclick="selectModel('1000', 'leather')">
-              <span class="badge"
-                style="background: var(--primary); color: #fff; font-size: 0.7rem; border-radius: 4px; padding: 2px 6px; margin-right: 5px;">PREMIUM</span>
-              1000 레더
-            </div>
-          </div>
-        </div>
-
-        <!-- Tiered Specification Tabs Selection -->
-        <div class="form-group" style="margin-bottom: 35px;">
-          <label
-            style="margin-bottom: 15px; display: block; font-weight: 700; color: var(--text-main); font-size: 1.1rem;"><i
-              data-lucide="layers"></i> 시공 규격 및 사양 (Model Selection)</label>
-          <div class="spec-tabs" id="specTabs" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-            <button class="spec-tab active" data-size="600" data-type="standard"
-              style="padding: 12px 10px;">600</button>
-            <button class="spec-tab" data-size="800" data-type="standard" style="padding: 12px 10px;">800</button>
-            <button class="spec-tab" data-size="800" data-type="leather" style="padding: 12px 10px;">800 레더</button>
-            <button class="spec-tab" data-size="1000" data-type="leather" style="padding: 12px 10px;">1000 레더</button>
-            <button class="spec-tab" data-size="1200" data-type="leather" style="padding: 12px 10px;">1200 레더</button>
-          </div>
-          <!-- Hidden inputs for legacy support (connected to JS) -->
-          <input type="hidden" id="matSize" value="600">
-          <input type="hidden" id="matType" value="standard">
-        </div>
 
         <!-- Spaces Container -->
         <div id="spacesContainer">
@@ -212,9 +177,27 @@
         </button>
 
         <div style="margin-bottom: 35px; border-top: 1px solid var(--border-color); padding-top: 30px;">
-          <label
-            style="margin-bottom: 20px; display: block; font-weight: 700; color: var(--text-main); font-size: 1.1rem;"><i
-              data-lucide="settings-2"></i> 규격별 특가 및 추가 할인 관리</label>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <label style="font-weight: 700; color: var(--text-main); font-size: 1.1rem; margin-bottom: 0;">
+              <i data-lucide="settings-2"></i> 규격별 특가 및 추가 할인 관리
+            </label>
+            
+            <!-- Relocated Quick Select Chips -->
+            <div style="display: flex; gap: 8px;">
+               <div class="recommend-chip" onclick="selectModel('800', 'leather')" style="padding: 6px 14px; font-size: 0.8rem;">
+                <span style="background: #ffcc00; color: #000; font-size: 0.65rem; border-radius: 4px; padding: 1px 5px; margin-right: 5px; font-weight: 800;">BEST</span>
+                800 레더
+              </div>
+              <div class="recommend-chip" onclick="selectModel('1000', 'leather')" style="padding: 6px 14px; font-size: 0.8rem;">
+                <span style="background: var(--primary); color: #fff; font-size: 0.65rem; border-radius: 4px; padding: 1px 5px; margin-right: 5px; font-weight: 800;">PREMIUM</span>
+                1000 레더
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden inputs kept to prevent JS breakage -->
+          <input type="hidden" id="matSize" value="600">
+          <input type="hidden" id="matType" value="standard">
 
           <!-- Pricing Control Table -->
           <div
