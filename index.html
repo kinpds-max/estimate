@@ -379,22 +379,50 @@
         </button>
       </section>
 
-      <!-- Analysis & Comparison Section -->
-      <div class="grid-layout content-width-sync" id="comparisonDashboard" style="display: none; grid-template-columns: 1fr 1fr; margin-top: 20px; gap: 20px;">
-        <!-- Left: Active Selected Spec Detail -->
-        <div id="activeReportGrid">
-          <!-- Populated by JS -->
-        </div>
+      <!-- Analysis & Comparison Dashboard -->
+      <section id="comparisonSection" class="animate-in" style="display: none; margin-bottom: 50px;">
+        <h2 style="margin-bottom: 30px; text-align: center;"><i data-lucide="layout-grid"></i> HASNOL 규격별 통합 AI 시공 분석 및 견적</h2>
 
-        <!-- Right: Size Comparison Table -->
-        <section class="card animate-in" id="comparisonTableSection" style="margin-bottom: 0;">
-          <h2 style="margin-bottom: 25px;"><i data-lucide="bar-chart-2"></i> 규격별 가격 비교표</h2>
-          <div id="fullPricingComparison" style="overflow-x: auto;">
-            <!-- Populated by JS -->
+        <!-- Side-by-Side Flex Layout -->
+        <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-start;">
+          
+          <!-- LEFT COLUMN: Comparison Table & Note -->
+          <div style="flex: 1.5; min-width: 450px;">
+            <div id="comparisonSummaryTable" style="margin-bottom: 25px;">
+              <!-- Populated by JS -->
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); padding: 15px; background: #f8faff; border-radius: 12px; border: 1px solid #eef2ff;">
+              🎨 상시 업데이트되는 AI 분석 엔진이 공간 특성에 맞춰 최적의 배치를 제안합니다.
+            </p>
           </div>
-          <p style="font-size: 0.75rem; color: #888; margin-top: 15px; text-align: right;">* 실제 시공 시 정밀 실측에 따라 수량이 가감될 수 있습니다.</p>
-        </section>
-      </div>
+
+          <!-- RIGHT COLUMN: Detailed Card & AI Preview Image -->
+          <div style="flex: 1; min-width: 380px;">
+            <!-- Analysis Tabs (Moved here to control the detail card) -->
+            <div class="analysis-tabs" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 10px; background: #f0f4ff; border-radius: 20px; box-shadow: inset 0 2px 10px rgba(10,84,247,0.05); margin-bottom: 20px;">
+              <button class="analysis-tab active" data-id="rec" style="padding: 10px 15px; font-size: 0.8rem;">🛡️ 추천</button>
+              <button class="analysis-tab" data-id="600_std" style="padding: 10px 15px; font-size: 0.8rem;">600</button>
+              <button class="analysis-tab" data-id="800_std" style="padding: 10px 15px; font-size: 0.8rem;">800</button>
+              <button class="analysis-tab" data-id="800_lea" style="padding: 10px 15px; font-size: 0.8rem;">800레더</button>
+              <button class="analysis-tab" data-id="1000_lea" style="padding: 10px 15px; font-size: 0.8rem;">1000레더</button>
+              <button class="analysis-tab" data-id="1200_lea" style="padding: 10px 15px; font-size: 0.8rem;">1200레더</button>
+            </div>
+
+            <div id="activeReportGrid" style="margin-bottom: 25px;">
+              <!-- Active Detail Card injected here via JS -->
+            </div>
+
+            <!-- Nano 2 AI Preview Image -->
+            <div style="border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-premium); border: 2px solid #eef2ff;">
+              <div style="padding: 12px 20px; background: #f8faff; border-bottom: 1px solid #eef2ff; font-weight: 800; font-size: 0.75rem; color: var(--primary);">
+                PREVIEW : AI 예상 시공 이미지 (NANO 2.0)
+              </div>
+              <img src="assets/hasnol_preview.png" alt="Construction Preview" style="width: 100%; display: block;">
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
 
       <!-- AI Certification Vault -->
       <section class="card animate-in"

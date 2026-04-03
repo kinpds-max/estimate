@@ -450,21 +450,23 @@ input[type="checkbox"] {
 .summary-table th {
   background: var(--primary);
   color: white;
-  padding: 18px 15px;
-  font-size: 0.85rem;
+  padding: 12px 10px;
+  font-size: 0.8rem;
   font-weight: 700;
   text-align: center;
   letter-spacing: 0.05em;
   border: none;
+  white-space: nowrap;
 }
 
 .summary-table td {
-  padding: 15px;
+  padding: 12px 10px;
   border-bottom: 1px solid #f0f4fa;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-main);
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .summary-row:hover td {
