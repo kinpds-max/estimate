@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.style = 'padding: 20px; background: #fff; border: 1px solid #eef2ff; margin-bottom: 20px; position: relative; border-radius: 12px; box-shadow: var(--shadow-soft);';
         div.innerHTML = `
             <button class="remove-btn" style="position: absolute; top: 15px; right: 15px; border: none; background: #f1f3f5; color: #adb5bd; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 14px; transition: all 0.2s;">제거 ✕</button>
-            <div style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 20px;">
+            <div class="space-inner-grid" style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 20px;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label>공간 구분</label>
                 <select class="space-type" onchange="toggleCustomSpace(this)">
@@ -459,9 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          (sizeKey === '1200') ? totalQtyWithSpare / 0.25 : totalQtyWithSpare;
 
         let installFee = 0;
-        if (qty600eq <= 40) installFee = 200000;
-        else if (qty600eq <= 70) installFee = 100000;
-        else installFee = 0;
+        if (qty600eq >= 41 && qty600eq <= 69) installFee = 100000;
 
         const deliveryFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
         const reinstallFee = (reinstallChk && reinstallChk.checked ? 450000 : 0);
@@ -529,8 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const qty600eq = qtyWithSpare / scaleF;
             
             let iFee = 0;
-            if (qty600eq <= 40) iFee = 200000;
-            else if (qty600eq <= 70) iFee = 100000;
+            if (qty600eq >= 41 && qty600eq <= 69) iFee = 100000;
             
             // Re-installation demolition baseline
             const reinstallFee = (reinstallChk && reinstallChk.checked) ? 450000 : 0;
@@ -755,57 +752,143 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSketch(spacesData, targetContainer = null) {
         const container = targetContainer || sketchPad;
-        container.innerHTML = ''; 
+        container.innerHTML = '';
 
-        // Add Nano-AI Scan line
         const scan = document.createElement('div');
         scan.className = 'scan-line';
         container.appendChild(scan);
 
         if (spacesData.length === 0) {
-            container.innerHTML = '<p style="color:#aaa; font-weight:500;">가로, 세로 값을 입력하면<br>AI가 공간별로 분석하여 배치를 그려냅니다.</p>';
+            const msg = document.createElement('p');
+            msg.style = 'color:#aaa; font-weight:500; position:relative; z-index:10;';
+            msg.innerHTML = '가로, 세로 값을 입력하면<br>AI가 공간별로 분석하여 배치를 그려냅니다.';
+            container.appendChild(msg);
             return;
         }
 
-        const planContainer = document.createElement('div');
-        planContainer.style = 'display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; position: relative; z-index: 10;';
+        // --- SVG AutoCAD-style floor plan ---
+        const NS = 'http://www.w3.org/2000/svg';
+        const TILE_PX = 22;
+        const GAP = 36;
+        const PAD = 28;
+        const DIM = 18; // space above for dimension label
 
-        spacesData.forEach(space => {
-            const spaceWrapper = document.createElement('div');
-            spaceWrapper.style = 'background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; border: 1px solid #eef2ff;';
-            spaceWrapper.className = 'ai-pulse';
-
-            const grid = document.createElement('div');
-            grid.style.display = 'grid';
-            grid.style.gap = '2px';
-            grid.style.margin = '0 auto';
-            grid.style.gridTemplateColumns = `repeat(${space.cols}, 1fr)`;
-            
-            const maxWidth = targetContainer ? 160 : 320;
-            const maxTileLimit = targetContainer ? 12 : 24;
-            const tileSize = Math.max(3, Math.min(maxTileLimit, Math.floor(maxWidth / space.cols)));
-            
-            grid.style.width = 'fit-content';
-            
-            for (let i = 0; i < space.cols * space.rows; i++) {
-                const tile = document.createElement('div');
-                tile.style.width = `${tileSize}px`;
-                tile.style.height = `${tileSize}px`;
-                tile.style.background = 'var(--primary)';
-                tile.style.opacity = (targetContainer ? '0.7' : '0.9');
-                tile.style.borderRadius = '1px';
-                grid.appendChild(tile);
-            }
-            
-            spaceWrapper.appendChild(grid);
-            const label = document.createElement('p');
-            label.style = 'font-size: 0.75rem; margin-top: 10px; color: var(--primary); font-weight: 800; letter-spacing: -0.02em;';
-            label.innerHTML = `<span style="font-size:0.6rem; vertical-align:middle; margin-right:4px; opacity:0.6;">[NANO-ANALYSIS]</span>${space.typeName} (${space.cols}✕${space.rows})`;
-            spaceWrapper.appendChild(label);
-
-            planContainer.appendChild(spaceWrapper);
+        // Compute layout
+        let totalW = PAD;
+        let maxH = 0;
+        const layouts = spacesData.map(sp => {
+            const rw = sp.cols * TILE_PX;
+            const rh = sp.rows * TILE_PX;
+            const x = totalW;
+            totalW += rw + GAP;
+            maxH = Math.max(maxH, rh);
+            return { ...sp, rw, rh, x };
         });
-        container.appendChild(planContainer);
+        totalW += PAD - GAP;
+        const totalH = PAD + DIM + maxH + DIM + PAD;
+        const svgW = Math.max(320, totalW);
+        const svgH = Math.max(200, totalH);
+
+        const svg = document.createElementNS(NS, 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', svgH);
+        svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+        svg.style.cssText = 'display:block; position:relative; z-index:10; overflow:visible;';
+
+        // Defs: tile fill pattern
+        const defs = document.createElementNS(NS, 'defs');
+        const pat = document.createElementNS(NS, 'pattern');
+        pat.setAttribute('id', 'tilePat');
+        pat.setAttribute('width', TILE_PX);
+        pat.setAttribute('height', TILE_PX);
+        pat.setAttribute('patternUnits', 'userSpaceOnUse');
+        const patRect = document.createElementNS(NS, 'rect');
+        patRect.setAttribute('width', TILE_PX);
+        patRect.setAttribute('height', TILE_PX);
+        patRect.setAttribute('fill', 'rgba(0,91,181,0.07)');
+        patRect.setAttribute('stroke', 'rgba(0,91,181,0.22)');
+        patRect.setAttribute('stroke-width', '0.6');
+        pat.appendChild(patRect);
+        defs.appendChild(pat);
+        svg.appendChild(defs);
+
+        function el(tag, attrs) {
+            const e = document.createElementNS(NS, tag);
+            for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+            return e;
+        }
+        function txt(x, y, content, attrs) {
+            const t = document.createElementNS(NS, 'text');
+            t.setAttribute('x', x); t.setAttribute('y', y);
+            for (const [k, v] of Object.entries(attrs)) t.setAttribute(k, v);
+            t.textContent = content;
+            return t;
+        }
+
+        layouts.forEach(sp => {
+            const rx = sp.x;
+            const ry = PAD + DIM;
+
+            // Tile fill
+            svg.appendChild(el('rect', { x: rx, y: ry, width: sp.rw, height: sp.rh, fill: 'url(#tilePat)' }));
+
+            // Vertical grid lines
+            for (let c = 0; c <= sp.cols; c++) {
+                const lx = rx + c * TILE_PX;
+                const isEdge = c === 0 || c === sp.cols;
+                svg.appendChild(el('line', {
+                    x1: lx, y1: ry, x2: lx, y2: ry + sp.rh,
+                    stroke: isEdge ? '#005bb5' : 'rgba(0,91,181,0.25)',
+                    'stroke-width': isEdge ? '2' : '0.5'
+                }));
+            }
+            // Horizontal grid lines
+            for (let r = 0; r <= sp.rows; r++) {
+                const ly = ry + r * TILE_PX;
+                const isEdge = r === 0 || r === sp.rows;
+                svg.appendChild(el('line', {
+                    x1: rx, y1: ly, x2: rx + sp.rw, y2: ly,
+                    stroke: isEdge ? '#005bb5' : 'rgba(0,91,181,0.25)',
+                    'stroke-width': isEdge ? '2' : '0.5'
+                }));
+            }
+
+            // Dimension ticks & labels — top (width)
+            const dimY = ry - 8;
+            svg.appendChild(el('line', { x1: rx, y1: dimY, x2: rx + sp.rw, y2: dimY, stroke: '#5a7fb5', 'stroke-width': '1', 'stroke-dasharray': '3,2' }));
+            svg.appendChild(el('line', { x1: rx, y1: dimY - 4, x2: rx, y2: dimY + 4, stroke: '#5a7fb5', 'stroke-width': '1.5' }));
+            svg.appendChild(el('line', { x1: rx + sp.rw, y1: dimY - 4, x2: rx + sp.rw, y2: dimY + 4, stroke: '#5a7fb5', 'stroke-width': '1.5' }));
+            svg.appendChild(txt(rx + sp.rw / 2, dimY - 10, `${sp.w}cm`, {
+                'text-anchor': 'middle', 'font-size': '10', fill: '#005bb5', 'font-weight': '700', 'font-family': 'monospace'
+            }));
+
+            // Dimension ticks — right (height)
+            const dimX = rx + sp.rw + 8;
+            svg.appendChild(el('line', { x1: dimX, y1: ry, x2: dimX, y2: ry + sp.rh, stroke: '#5a7fb5', 'stroke-width': '1', 'stroke-dasharray': '3,2' }));
+            svg.appendChild(el('line', { x1: dimX - 4, y1: ry, x2: dimX + 4, y2: ry, stroke: '#5a7fb5', 'stroke-width': '1.5' }));
+            svg.appendChild(el('line', { x1: dimX - 4, y1: ry + sp.rh, x2: dimX + 4, y2: ry + sp.rh, stroke: '#5a7fb5', 'stroke-width': '1.5' }));
+            const dimTxt = txt(dimX + 5, ry + sp.rh / 2, `${sp.h}cm`, {
+                'text-anchor': 'start', 'dominant-baseline': 'middle', 'font-size': '10', fill: '#005bb5', 'font-weight': '700', 'font-family': 'monospace'
+            });
+            svg.appendChild(dimTxt);
+
+            // Center room label
+            const lblBg = el('rect', {
+                x: rx + sp.rw / 2 - 30, y: ry + sp.rh / 2 - 9,
+                width: 60, height: 18, fill: 'rgba(255,255,255,0.88)', rx: '4'
+            });
+            svg.appendChild(lblBg);
+            svg.appendChild(txt(rx + sp.rw / 2, ry + sp.rh / 2 + 1, sp.typeName, {
+                'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': '11', fill: '#003d7a', 'font-weight': '800'
+            }));
+
+            // Below: tile count
+            svg.appendChild(txt(rx + sp.rw / 2, ry + sp.rh + DIM - 2, `${sp.cols}×${sp.rows} = ${sp.cols * sp.rows}장`, {
+                'text-anchor': 'middle', 'font-size': '9.5', fill: '#888', 'font-weight': '600', 'font-family': 'monospace'
+            }));
+        });
+
+        container.appendChild(svg);
     }
 
     // --- Price Comparison Table Logic ---
@@ -907,14 +990,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const referralDiscountFlat = (parseInt(groupPurchaseTier.value) === 0) ? (refCount * 50000) : 0;
         const eventDiscountFlat = (reviewEventChk && reviewEventChk.checked ? 30000 : 0);
         
+        const scaleF2 = (sizeKeyIn === '800') ? 0.56 : (sizeKeyIn === '1000') ? 0.36 : (sizeKeyIn === '1200') ? 0.25 : 1.0;
+        const qty600eq2 = sTotalQty / scaleF2;
         let installFee = 0;
-        if (sizeKeyIn === '600') {
-            if (sTotalQty <= 70) installFee = 100000;
-        } else {
-            // Logic for other sizes (can be adjusted)
-            if (sTotalQty < 40) installFee = 200000;
-            else if (sTotalQty < 70) installFee = 100000;
-        }
+        if (qty600eq2 >= 41 && qty600eq2 <= 69) installFee = 100000;
         
         const deliveryFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
         

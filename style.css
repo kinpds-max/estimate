@@ -577,20 +577,107 @@ input[type="checkbox"] {
 
 /* Mobile Optimization */
 @media (max-width: 768px) {
-  :root { --border-radius: 16px; }
-  .container { padding: 25px 15px; }
-  h1 { font-size: 1.8rem !important; }
-  h2 { font-size: 1.4rem !important; }
-  .card { padding: 20px 15px !important; margin-bottom: 25px !important; }
+  :root { --border-radius: 12px; }
+
+  .container { padding: 18px 14px 60px; }
+
+  h1 { font-size: 1.55rem !important; }
+  h2 { font-size: 1.15rem !important; }
+
+  .card { padding: 18px 14px !important; margin-bottom: 18px !important; }
   .grid-layout { grid-template-columns: 1fr !important; }
+
+  /* Header: 좌우 → 세로 스택 */
+  header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 14px !important;
+  }
+  header > div:last-child { text-align: left !important; }
+
+  /* 고객 정보 2열 → 1열 */
+  .cust-grid { grid-template-columns: 1fr !important; }
+
+  /* 공간 입력 3열(고정폭) → 1열 공간구분 + 2열 가로세로 */
+  .space-inner-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+  .space-inner-grid > .form-group:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* 가격 테이블: 가로 스크롤 */
+  .pricing-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+  }
+  .pricing-table-wrap > div { min-width: 520px; }
+
+  /* 할인 헤더 행: 좌우 → 세로 */
+  .discount-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* 프로모션 2열 → 1열 */
+  .promo-grid { grid-template-columns: 1fr !important; }
+
+  /* 체크박스 행: 세로 나열 */
+  .checkbox-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* 비교 대시보드: 좌우 → 세로 스택 */
+  .comparison-col-left,
+  .comparison-col-right {
+    min-width: 100% !important;
+    width: 100% !important;
+    flex: unset !important;
+  }
+
+  /* 분석 탭 */
+  .analysis-tabs { gap: 5px !important; padding: 10px 8px !important; }
+  .analysis-tab { padding: 8px 10px !important; font-size: 0.72rem !important; }
+
+  /* 요약 테이블 */
+  .summary-table { font-size: 0.72rem; }
+  .summary-table th,
+  .summary-table td {
+    font-size: 0.7rem !important;
+    padding: 8px 5px !important;
+    white-space: normal !important;
+  }
+
+  /* 스케치패드 */
+  #sketchPad { min-height: 260px !important; padding: 20px !important; }
+
+  /* 하단 버튼 바 */
+  .bottom-action-bar {
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+  .bottom-action-bar .btn { min-width: unset !important; width: 100% !important; }
+
+  /* 스펙 탭 */
   .spec-tabs { grid-template-columns: 1fr 1fr !important; }
-  .summary-table th, .summary-table td { font-size: 0.7rem !important; padding: 10px 5px !important; }
-  input, select, button { font-size: 14px !important; padding: 10px !important; }
-  .analysis-tab { padding: 8px 10px !important; font-size: 0.7rem !important; }
-  .document-section { padding: 40px 20px !important; }
-  .document-section h1 { font-size: 1.5rem !important; }
-  .document-section h2 { font-size: 1.2rem !important; }
-  .document-section li { font-size: 0.9rem !important; line-height: 1.6 !important; }
+
+  /* iOS 줌 방지 */
+  input[type="number"],
+  input[type="text"],
+  select { font-size: 16px !important; }
+
+  /* 계약서 영역 */
+  .document-section { padding: 30px 14px !important; }
+  .document-section h1 { font-size: 1.3rem !important; }
+  .document-section h2 { font-size: 1.05rem !important; }
+  .document-section li { font-size: 0.85rem !important; line-height: 1.6 !important; }
 }
 
 /* Print Overrides */

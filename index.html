@@ -50,7 +50,7 @@
       <section class="card animate-in">
         <h2 style="margin-bottom: 25px;"><i data-lucide="calculator"></i> 견적 입력</h2>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; background: #f8faff; padding: 20px; border-radius: 12px; border: 1px solid #eef2ff;">
+        <div class="cust-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; background: #f8faff; padding: 20px; border-radius: 12px; border: 1px solid #eef2ff;">
           <div class="form-group" style="margin-bottom: 0;">
             <label for="customerName" style="font-size: 0.85rem;">고객명</label>
             <input type="text" id="customerName" placeholder="예: 홍길동">
@@ -136,7 +136,7 @@
         <div id="spacesContainer">
           <div class="space-item card"
             style="padding: 20px; background: #fff; border: 1px solid #eee; margin-bottom: 15px; position: relative;">
-            <div style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 15px;">
+            <div class="space-inner-grid" style="display: grid; grid-template-columns: 140px 1fr 1fr; gap: 15px;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label>공간 구분</label>
                 <select class="space-type" onchange="toggleCustomSpace(this)">
@@ -171,7 +171,7 @@
         </button>
 
         <div style="margin-bottom: 35px; border-top: 1px solid var(--border-color); padding-top: 30px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div class="discount-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <label style="font-weight: 700; color: var(--text-main); font-size: 1.1rem; margin-bottom: 0;">
               <i data-lucide="settings-2"></i> 규격별 특가 및 추가 할인 관리
             </label>
@@ -194,6 +194,7 @@
           <input type="hidden" id="matType" value="standard">
 
           <!-- Pricing Control Table -->
+          <div class="pricing-table-wrap">
           <div
             style="width: 100%; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; background: #fff; box-shadow: var(--shadow-soft);">
             <div
@@ -287,6 +288,7 @@
               </div>
             </div>
           </div>
+          </div><!-- /pricing-table-wrap -->
 
           <div style="display: none;">
             <input type="number" id="discountPerMat" value="0">
@@ -297,7 +299,7 @@
         <div style="background: #f1f3f5; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
           <label style="margin-bottom: 12px; display: block; font-weight: 700; color: var(--primary);">🏢 시공 프로모션 및 특별
             혜택</label>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div class="promo-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div class="form-group" style="margin-bottom: 0;">
               <label style="font-size: 0.8rem;">공동구매 및 짝궁 할인</label>
               <select id="groupPurchaseTier" style="font-size: 0.85rem; padding: 8px;">
@@ -320,7 +322,7 @@
           </div>
 
           <div
-            style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
+            class="checkbox-row" style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px; padding-top: 15px; border-top: 1px solid #dee2e6;">
             <label
               style="display: flex; align-items: center; cursor: pointer; font-weight: normal; font-size: 0.85rem;">
               <input type="checkbox" id="reviewCash" style="margin-right: 8px; width: 18px; height: 18px;"> 후기 2곳 현금할인
@@ -371,10 +373,10 @@
         </div>
 
         <!-- Side-by-Side Flex Layout -->
-        <div style="display: flex; gap: 25px; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;">
-          
+        <div class="comparison-cols" style="display: flex; gap: 25px; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;">
+
           <!-- LEFT COLUMN: Comparison Table & Note -->
-          <div style="flex: 1.2; min-width: 400px; width: 0;">
+          <div class="comparison-col-left" style="flex: 1.2; min-width: 400px; width: 0;">
             <div id="comparisonSummaryTable" style="margin-bottom: 25px;">
               <!-- Populated by JS -->
             </div>
@@ -405,7 +407,7 @@
           </div>
 
           <!-- RIGHT COLUMN: Detailed Card -->
-          <div style="flex: 1; min-width: 380px; width: 0;">
+          <div class="comparison-col-right" style="flex: 1; min-width: 380px; width: 0;">
 
             <div id="activeReportGrid" style="margin-bottom: 25px;">
               <!-- Active Detail Card injected here via JS -->
