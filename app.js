@@ -154,12 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
         matSizeSel.value = size;
         matTypeSel.value = type;
 
-        // Update UI Tabs
-        document.querySelectorAll('.spec-tab').forEach(tab => {
-            if (tab.dataset.size === size && tab.dataset.type === type) {
-                tab.classList.add('active');
+        // Update UI Tabs (Internal Result Picker)
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            if (btn.innerText.includes(size)) {
+                // Approximate match for leather since size name might differ
+                if (type === 'leather' && btn.innerText.includes('레더')) btn.classList.add('active');
+                else if (type === 'standard' && !btn.innerText.includes('레더')) btn.classList.add('active');
+                else btn.classList.remove('active');
             } else {
-                tab.classList.remove('active');
+                btn.classList.remove('active');
             }
         });
 
@@ -694,6 +697,40 @@ document.addEventListener('DOMContentLoaded', () => {
             tableContainer.innerHTML = html;
         })(spacesData);
 
+        // --- Render Side Price Matrix (Right Sidebar) ---
+        (function renderSidePriceMatrix(sData) {
+            const sideContainer = document.getElementById('sidePriceMatrix');
+            if (!sideContainer) return;
+
+            const tiers = [
+                { size: '600', type: 'standard', name: '600 표준' },
+                { size: '800', type: 'standard', name: '800 표준' },
+                { size: '800', type: 'leather', name: '800 레더' },
+                { size: '1000', type: 'leather', name: '1000 레더' },
+                { size: '1200', type: 'leather', name: '1200 레더' }
+            ];
+
+            const currentSize = matSizeSel.value;
+            const currentType = matTypeSel.value;
+
+            sideContainer.innerHTML = tiers.map(tier => {
+                const data = getComputedPrice(tier.size, tier.type, sData);
+                const isActive = (currentSize === tier.size && currentType === tier.type);
+                
+                return `
+                    <div class="side-price-item ${isActive ? 'active' : ''}" onclick="selectModel('${tier.size}', '${tier.type}')" style="cursor:pointer; padding: 15px 10px; border-bottom: 1px solid #f2f2f7;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 800; font-size: 0.9rem; color: ${isActive ? 'var(--primary)' : 'var(--text-main)'};">${tier.name}</div>
+                            <div style="font-size: 0.7rem; color: #888;">예상 ${data.qty}장</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">${data.total.toLocaleString()}원</div>
+                            <div style="font-size: 0.65rem; color: #aaa; text-decoration: line-through;">기존 ${data.bT.toLocaleString()}원</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        })(spacesData);
     }
 
     window.applyFromTab = function(size, type) {
@@ -758,14 +795,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Official Certification Data (Crawled from hasnol.kr) ---
     const certifications = [
-        { title: 'SGS 충격흡수 98%', body: '글로벌 안전성 인증', icon: 'shield-check' },
-        { title: 'KOTITI 라돈안심', body: '방사능 안전 테스트 완료', icon: 'wind' },
-        { title: 'KTR 난연인증', body: 'UL 94 V-2 등급 획득', icon: 'flame' },
-        { title: 'KC 어린이제품', body: '유해물질 불검출 인증', icon: 'baby' },
-        { title: 'KSPO 공식인정', body: '충격흡수율 73.6% 인정', icon: 'award' },
-        { title: '아토피 안심', body: '영유아 피부안전 통과', icon: 'heart' },
-        { title: '반려동물 친환경', body: 'KACI 향균 및 안전 통과', icon: 'dog' },
-        { title: 'ISO 9001:2015', body: '국제 품질 경영 표준', icon: 'globe' }
+        { title: 'SGS 충격흡수 98%', body: '글로벌 안전성 인증', icon: 'shield-check', url: 'https://www.hasnol.kr/certification' },
+        { title: 'KOTITI 라돈안심', body: '방사능 안전 테스트 완료', icon: 'wind', url: 'https://www.hasnol.kr/certification' },
+        { title: 'KTR 난연인증', body: 'UL 94 V-2 등급 획득', icon: 'flame', url: 'https://www.hasnol.kr/certification' },
+        { title: 'KC 어린이제품', body: '유해물질 불검출 인증', icon: 'baby', url: 'https://www.hasnol.kr/certification' },
+        { title: 'KSPO 공식인정', body: '충격흡수율 73.6% 인정', icon: 'award', url: 'https://www.hasnol.kr/certification' },
+        { title: '아토피 안심', body: '영유아 피부안전 통과', icon: 'heart', url: 'https://www.hasnol.kr/certification' },
+        { title: '반려동물 친환경', body: 'KACI 향균 및 안전 통과', icon: 'dog', url: 'https://www.hasnol.kr/certification' },
+        { title: 'ISO 9001:2015', body: '국제 품질 경영 표준', icon: 'globe', url: 'https://www.hasnol.kr/certification' }
     ];
 
     // --- Dynamic Review Data (Crawled from Naver/Insta) ---
@@ -806,11 +843,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const vault = document.getElementById('certVault');
         if (!vault) return;
         vault.innerHTML = certifications.map(cert => `
-            <div style="padding: 15px; background: white; border-radius: 12px; border: 1px solid #eef2ff; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+            <a href="${cert.url}" target="_blank" style="text-decoration: none; display: block; padding: 15px; background: white; border-radius: 12px; border: 1px solid #eef2ff; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); transition: transform 0.2s;">
                 <i data-lucide="${cert.icon}" style="width: 20px; color: var(--primary); margin-bottom: 8px;"></i>
                 <h5 style="font-size: 0.8rem; font-weight: 800; margin-bottom: 4px; color: var(--text-main);">${cert.title}</h5>
                 <p style="font-size: 0.65rem; color: #888;">${cert.body}</p>
-            </div>
+            </a>
         `).join('');
         lucide.createIcons();
     }
@@ -973,11 +1010,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const canvasWidth = canvasMap.width;
+                    const canvasHeight = canvasMap.height;
+                    
                     const imgData = canvasMap.toDataURL('image/jpeg', 0.95);
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    
                     const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (canvasMap.height * pdfWidth) / canvasMap.width;
-                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    const pdfPageHeight = pdf.internal.pageSize.getHeight();
+                    const imgHeightInPdf = (canvasHeight * pdfWidth) / canvasWidth;
+                    
+                    let heightLeft = imgHeightInPdf;
+                    let position = 0;
+                    
+                    pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInPdf);
+                    heightLeft -= pdfPageHeight;
+                    
+                    while (heightLeft > 0) {
+                        position = heightLeft - imgHeightInPdf;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInPdf);
+                        heightLeft -= pdfPageHeight;
+                    }
 
                     const fileNameDate = new Date().toISOString().slice(0, 10);
                     const fileName = `HASNOL_견적서_${fileNameDate}.pdf`;
@@ -1054,14 +1108,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     });
 
-    // 📁 구글 드라이브
-    document.getElementById('shareDriveBtn').addEventListener('click', () => {
+    // 📧 이메일
+    document.getElementById('shareEmailBtn').addEventListener('click', () => {
         closeModal();
         if (!_pdfBlob || !_pdfFileName) return;
         downloadBlobFile(_pdfBlob, _pdfFileName);
         setTimeout(() => {
-            window.open('https://drive.google.com/drive/my-drive', '_blank');
-            alert('✅ PDF가 저장되었습니다.\n구글 드라이브에서 "+ 새로 만들기 → 파일 업로드"로 업로드해주세요.');
+            const subject = encodeURIComponent('HASNOL 견적서 공유');
+            const body = encodeURIComponent('다운로드된 견적서 PDF 파일을 첨부하여 확인 부탁드립니다.');
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            alert('✅ PDF가 저장되었습니다.\n이메일 작성이 완료되면 파일을 첨부해 주세요.');
+        }, 800);
+    });
+
+    // 📠 모바일 팩스
+    document.getElementById('shareFaxBtn').addEventListener('click', () => {
+        closeModal();
+        if (!_pdfBlob || !_pdfFileName) return;
+        downloadBlobFile(_pdfBlob, _pdfFileName);
+        setTimeout(() => {
+            alert('✅ PDF가 저장되었습니다.\n모바일 팩스 앱을 실행하여 저장된 파일을 전송해 주세요.');
         }, 800);
     });
 
@@ -1076,16 +1142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🖨️ 문서 PDF 저장/출력 버튼
+    // 🖨️ 문서 출력 버튼
     if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', async () => {
-            const result = await buildPDFBlob(downloadPdfBtn);
-            if (!result) return;
-            downloadBlobFile(result.blob, result.fileName);
-            
-            // Note: window.print() is optional here, but direct download is usually preferred for "Save"
-            // If the user also wants to print, they can open the downloaded file.
-            // Or we can add a choice. For now, let's make it actually "Save" to PDF.
+        downloadPdfBtn.addEventListener('click', () => {
+            window.print();
         });
     }
 });

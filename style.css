@@ -75,12 +75,65 @@ h1 {
 
 .grid-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 30px;
+}
+
+/* Ensure consistent width for all main sections */
+.content-width-sync {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (max-width: 992px) {
   .grid-layout { grid-template-columns: 1fr; }
+}
+
+/* Internal Size Selector in Result Section */
+.result-size-selector {
+  display: flex;
+  gap: 5px;
+  background: #f0f4ff;
+  padding: 5px;
+  border-radius: 12px;
+  border: 1.5px solid var(--primary-light);
+}
+
+.size-btn {
+  padding: 8px 15px;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.size-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 10px rgba(10, 84, 247, 0.2);
+}
+
+.size-btn:hover:not(.active) {
+  background: rgba(10, 84, 247, 0.1);
+}
+
+/* Bottom Action Bar */
+.bottom-action-bar {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  padding: 30px 20px 60px;
+  border-top: 1px solid #eee;
+  margin-top: 50px;
+}
+
+.bottom-action-bar .btn {
+  min-width: 200px;
 }
 
 /* Clean Form Styles */
