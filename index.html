@@ -46,6 +46,11 @@
       <hr style="border: 1.5px solid #000;">
     </div>
 
+    <div class="form-group no-print" style="margin-bottom: 25px; max-width: 250px;">
+      <label style="font-weight: 800; color: var(--primary); font-size: 0.85rem; margin-bottom: 8px; display: block;">📂 견적 발행 일자</label>
+      <input type="date" id="estimateDate" style="border-radius: 10px; padding: 12px; width: 100%; border: 1.5px solid var(--primary-light); font-weight: 600; color: var(--text-main); background: #f8faff;">
+    </div>
+
     <div class="grid-layout">
       <!-- Input Section -->
       <section class="card animate-in">
@@ -306,20 +311,6 @@
             </div>
           </div>
 
-          <div style="margin-top: 20px;">
-            <div class="form-group">
-              <label>견적일자</label>
-              <input type="date" id="estimateDate" style="border-radius: 8px; padding: 8px; width: 100%; border: 1px solid #ccc;">
-            </div>
-            <div class="form-group" style="margin-top: 10px;">
-              <label>고객명/연락처</label>
-              <div style="display: flex; gap: 10px;">
-                <input type="text" id="custName" placeholder="성함" style="flex: 1; border-radius: 8px; padding: 8px; border: 1px solid #ccc;">
-                <input type="text" id="custPhone" placeholder="010-0000-0000" style="flex: 1; border-radius: 8px; padding: 8px; border: 1px solid #ccc;">
-              </div>
-            </div>
-          </div>
-
           <div style="display: none;">
             <input type="number" id="discountPerMat" value="0">
             <input type="number" id="pricePerMat" value="0">
@@ -449,13 +440,23 @@
             <p style="font-size: 0.85rem; color: var(--text-muted);">표면 특수 코팅으로 수분 흡수가 되지 않아 음식물을 흘려도 가볍게 닦아내는 것만으로 깨끗하게 관리할 수 있습니다.</p>
           </div>
         </div>
-      </section>
+    </div>
+
+    <!-- Official Contract Title (Added per User Request) -->
+    <div style="text-align: center; margin-top: 60px; margin-bottom: 10px;">
+      <h3 style="font-size: 1.2rem; color: var(--primary); letter-spacing: 0.1em; font-weight: 800; margin-bottom: 5px;">HASNOL ESTIMATE & CONTRACT</h3>
+      <h1 style="font-size: 1.8rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.05em;">HASNOL 프리미엄 바닥매트 시공 견적서 및 표준 계약서</h1>
     </div>
 
     <!-- Document Section (Contract / Guarantee) -->
     <section class="card document-section no-print content-width-sync" 
              style="margin-top: 40px; text-align: center; border: 2px solid #eee; padding: 60px 40px;">
       
+      <div style="margin-bottom: 50px;">
+        <h3 style="font-size: 1.2rem; color: var(--primary); letter-spacing: 0.15em; font-weight: 800; margin-bottom: 10px;">HASNOL ESTIMATE & CONTRACT</h3>
+        <h1 style="font-size: 2.1rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.05em;">HASNOL 프리미엄 바닥매트 시공 견적서 및 표준 계약서</h1>
+      </div>
+
       <div class="info-section" style="max-width: 800px; margin: 0 auto;">
         <h2 style="font-size: 1.8rem; margin-bottom: 30px; text-align: center; color: var(--text-main);">
           <i data-lucide="info"></i> 시공 및 유지관리 주요 수칙
