@@ -29,9 +29,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const reviewEventChk = document.getElementById('reviewEvent');
     const calculateBtn = document.getElementById('calculateBtn');
 
+    const resultSection = document.querySelector('.result-section');
+    const comparisonSummaryTable = document.getElementById('comparisonSummaryTable');
+    const estimateDateIpt = document.getElementById('estimateDate');
+
+    if (estimateDateIpt) {
+        const today = new Date().toISOString().slice(0, 10);
+        estimateDateIpt.value = today;
+    }
+    const sketchPad = document.getElementById('sketchPad');
+
     const resQty = document.getElementById('resQty');
     const resTotal = document.getElementById('resTotal');
-    const sketchPad = document.getElementById('sketchPad');
 
     const appliedUnitPriceBox = document.getElementById('appliedUnitPrice');
     const valAppliedPrice = document.getElementById('valAppliedPrice');
@@ -1114,6 +1123,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const placeholder = document.getElementById('signPlaceholder');
                     const isPlaceholderVisible = placeholder && placeholder.style.display !== 'none';
 
+                    // Prepare for capture
+                    const originalScrollY = window.scrollY;
+                    window.scrollTo(0, 0);
+
                     noPrintElements.forEach(el => el.style.display = 'none');
                     if (placeholder) placeholder.style.display = 'none';
                     if (sigCanvas) {
@@ -1122,10 +1135,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const canvasMap = await html2canvas(elementToCapture, {
-                        scale: 1.5, useCORS: true, backgroundColor: '#ffffff',
-                        allowTaint: true, logging: false,
+                        scale: 2, // Higher scale for better quality
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        allowTaint: true,
+                        logging: false,
                         onclone: (clonedDoc) => {
-                            // Ensure the signature is visible in the clone
+                            // Mirror signature to cloned doc
                             const clonedCanvas = clonedDoc.getElementById('signaturePad');
                             if (clonedCanvas && sigCanvas) {
                                 const clonedCtx = clonedCanvas.getContext('2d');
@@ -1134,17 +1150,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
+                    // Restore UI
                     noPrintElements.forEach(el => el.style.display = '');
                     if (isPlaceholderVisible && placeholder) placeholder.style.display = 'block';
                     if (sigCanvas) {
                         sigCanvas.style.border = '1.5px dashed #ccc';
                         sigCanvas.style.background = '#fafafa';
                     }
+                    window.scrollTo(0, originalScrollY);
 
+                    // PDF Generation
                     const { jsPDF } = window.jspdf;
                     const canvasWidth = canvasMap.width;
                     const canvasHeight = canvasMap.height;
-                    
                     const imgData = canvasMap.toDataURL('image/jpeg', 0.95);
                     const pdf = new jsPDF('p', 'mm', 'a4');
                     
@@ -1159,8 +1177,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     heightLeft -= pdfPageHeight;
                     
                     while (heightLeft > 0) {
-                        position = heightLeft - imgHeightInPdf;
                         pdf.addPage();
+                        position = heightLeft - imgHeightInPdf;
                         pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeightInPdf);
                         heightLeft -= pdfPageHeight;
                     }
