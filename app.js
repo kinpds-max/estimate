@@ -445,13 +445,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalFlatDiscount = referralDiscountFlat + eventDiscountFlat;
 
         // 3. Fees and Logistics
+        const qty600eq = (sizeKey === '600') ? totalQtyWithSpare : 
+                         (sizeKey === '800') ? totalQtyWithSpare / 0.56 :
+                         (sizeKey === '1000') ? totalQtyWithSpare / 0.36 :
+                         (sizeKey === '1200') ? totalQtyWithSpare / 0.25 : totalQtyWithSpare;
+
         let installFee = 0;
-        if (totalQtyWithSpare < 40) installFee = 200000;
-        else if (totalQtyWithSpare < 70) installFee = 100000;
+        if (qty600eq <= 40) installFee = 200000;
+        else if (qty600eq <= 70) installFee = 100000;
         else installFee = 0;
 
         const deliveryFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
-        const totalFees = installFee + deliveryFee;
+        const reinstallFee = (reinstallChk && reinstallChk.checked ? 450000 : 0);
+        const totalFees = installFee + deliveryFee + reinstallFee;
 
         // --- Final Price Assembly ---
         const baseTotal = totalQtyWithSpare * originalPrice;
@@ -462,35 +468,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const finalPrice = Math.max(0, baseTotal - systemDiscountTotal - extraDiscountTotal + totalFees);
 
-        // Update Result Summary UI
-        const modelNameDisplay = document.getElementById('resModelName');
-        const headerModelNameDisplay = document.getElementById('headerModelName');
-        const activeName = `${sizeKey} ${typeKey === 'leather' ? '레더' : '표준'} 적용 중`;
-        
-        if (modelNameDisplay) {
-            modelNameDisplay.textContent = activeName;
-        }
-        if (headerModelNameDisplay) {
-            headerModelNameDisplay.textContent = activeName;
-        }
-        
-        if (resTotal) resTotal.textContent = finalPrice.toLocaleString();
-
-        // --- UI Feedback ---
-        if (unitDiscount > 0) {
-            appliedUnitPriceBox.style.display = 'block';
-            valAppliedPrice.textContent = (promoPrice - unitDiscount).toLocaleString();
-        } else {
-            appliedUnitPriceBox.style.display = 'none';
-        }
-
-        if (isPresetMode) {
-            resQty.innerHTML = `${totalQtyWithSpare.toLocaleString()}<small style="font-size: 0.8rem; font-weight: 300; display: block; margin-top: 5px; color: var(--secondary);">표준 권장 총량 (시공 편차 10장 내외 발생가능)</small>`;
-        } else {
-            resQty.innerHTML = `${totalQtyWithSpare.toLocaleString()}<small style="font-size: 0.8rem; font-weight: 300; display: block; margin-top: 5px; color: var(--secondary);">정밀 실측 수량 (시공 편차 10장 내외 발생가능)</small>`;
-        }
-        
-        resTotal.innerHTML = `${finalPrice.toLocaleString()}<small style="font-size: 1rem; font-weight: 300;"> 원</small>`;
+        // 4. Update the contract final price
+        if (contractTotal) contractTotal.textContent = finalPrice.toLocaleString();
 
         // Breakdown Info Section
         infoBasePrice.textContent = baseTotal.toLocaleString();
@@ -540,12 +519,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const flatD = refD + eveD;
 
             // Calculate 600mm-equivalent area for mathematically precise installation fee thresholds
-            const qty600eq = qtyWithSpare * Math.pow(parseFloat(sizeKeyIn) / 600, 2);
-            let iFee = 0;
-            if (qty600eq < 40) iFee = 200000;
-            else if (qty600eq < 70) iFee = 100000;
+            const scaleF = (sizeKeyIn === '800') ? 0.56 : (sizeKeyIn === '1000') ? 0.36 : (sizeKeyIn === '1200') ? 0.25 : 1.0;
+            const qty600eq = qtyWithSpare / scaleF;
             
-            // Re-installation demolition baseline (assuming flat rate per user request "up to 120 equivalency")
+            let iFee = 0;
+            if (qty600eq <= 40) iFee = 200000;
+            else if (qty600eq <= 70) iFee = 100000;
+            
+            // Re-installation demolition baseline
             const reinstallFee = (reinstallChk && reinstallChk.checked) ? 450000 : 0;
             
             const dFee = (regionDeliveryChk && regionDeliveryChk.checked ? 100000 : 0);
@@ -555,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sD = qtyWithSpare * (orig - prom);
             const eD = (qtyWithSpare * uDisc) + flatD;
             const fP = Math.max(0, bT - sD - eD + tFee);
-            return { total: fP, qty: qtyWithSpare, realQty: sTotalQty, unitOrig: orig, unitProm: prom, bT, sD, eD };
+            return { total: fP, qty: qtyWithSpare, realQty: sTotalQty, unitOrig: orig, unitProm: prom, bT, sD, eD, iF: tFee };
         }
 
         // --- Integrated Multi-Size Comparative Dashboard (Tabbed Logic) ---
@@ -650,14 +631,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);">${calculated.unitProm.toLocaleString()}원</span>
                 </div>
 
-                <li>기본 권장 및 설치 단가: ${calculated.bT.toLocaleString()}원</li>
-                <li>규격별 특별 프로모션 적용: -${calculated.sD.toLocaleString()}원</li>
-                <li>
-                    공구/짝궁/후기/혜택 합계: -${calculated.eD.toLocaleString()}원
-                    ${extraDiscountTier.value > 0 ? `<br><span style="color: var(--primary); font-size: 0.75rem; font-weight: 700; display: inline-block; margin-top: 4px;">(✔️ 적용 품목: ${extraDiscountTier.options[extraDiscountTier.selectedIndex].text})</span>` : ''}
-                </li>
-                <li style="color: var(--primary);">수량별 시공 분담금 및 물류비: +${calculated.iF.toLocaleString()}원</li>
-            </ul>
+                <ul style="border-top: 1px solid #eef2ff; margin-top: 25px; padding-top: 20px; padding-left: 20px; font-size: 0.85rem; color: #444; line-height: 1.8; margin-bottom: 0;">
+                    <li>기본 권장 및 설치 단가: ${calculated.bT.toLocaleString()}원</li>
+                    <li>규격별 특별 프로모션 적용: -${calculated.sD.toLocaleString()}원</li>
+                    <li>
+                        공구/짝궁/후기/혜택 합계: -${calculated.eD.toLocaleString()}원
+                        ${extraDiscountTier.value > 0 ? `<br><span style="color: var(--primary); font-size: 0.75rem; font-weight: 700; display: inline-block; margin-top: 4px;">(✔️ 적용 품목: ${extraDiscountTier.options[extraDiscountTier.selectedIndex].text})</span>` : ''}
+                    </li>
+                    <li style="color: var(--primary); font-weight: 700;">수량별 시공 분담금 및 물류비: +${calculated.iF.toLocaleString()}원</li>
+                </ul>
 
                 <div style="background: #f8faff; border-radius: 15px; padding: 25px; margin-top: 25px; border: 1px solid #eef2ff;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
