@@ -383,11 +383,21 @@
       <section id="comparisonSection" class="animate-in" style="display: none; margin-bottom: 50px;">
         <h2 style="margin-bottom: 30px; text-align: center;"><i data-lucide="layout-grid"></i> HASNOL 규격별 통합 AI 시공 분석 및 견적</h2>
 
+        <!-- Selection Tabs (Integrated Control) -->
+        <div class="analysis-tabs" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 15px; background: #f0f4ff; border-radius: 20px; box-shadow: inset 0 2px 10px rgba(10,84,247,0.05); margin-bottom: 35px;">
+          <button class="analysis-tab active" data-id="rec" style="padding: 12px 20px; font-size: 0.85rem;">🛡️ 최적 추천 (Recommended)</button>
+          <button class="analysis-tab" data-id="600_std" style="padding: 12px 20px; font-size: 0.85rem;">600</button>
+          <button class="analysis-tab" data-id="800_std" style="padding: 12px 20px; font-size: 0.85rem;">800</button>
+          <button class="analysis-tab" data-id="800_lea" style="padding: 12px 20px; font-size: 0.85rem;">800 레더</button>
+          <button class="analysis-tab" data-id="1000_lea" style="padding: 12px 20px; font-size: 0.85rem;">1000 레더</button>
+          <button class="analysis-tab" data-id="1200_lea" style="padding: 12px 20px; font-size: 0.85rem;">1200 레더</button>
+        </div>
+
         <!-- Side-by-Side Flex Layout -->
-        <div style="display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-start;">
+        <div style="display: flex; gap: 25px; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;">
           
           <!-- LEFT COLUMN: Comparison Table & Note -->
-          <div style="flex: 1.5; min-width: 450px;">
+          <div style="flex: 1.2; min-width: 400px; width: 0;">
             <div id="comparisonSummaryTable" style="margin-bottom: 25px;">
               <!-- Populated by JS -->
             </div>
@@ -397,16 +407,7 @@
           </div>
 
           <!-- RIGHT COLUMN: Detailed Card & AI Preview Image -->
-          <div style="flex: 1; min-width: 380px;">
-            <!-- Analysis Tabs (Moved here to control the detail card) -->
-            <div class="analysis-tabs" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; padding: 10px; background: #f0f4ff; border-radius: 20px; box-shadow: inset 0 2px 10px rgba(10,84,247,0.05); margin-bottom: 20px;">
-              <button class="analysis-tab active" data-id="rec" style="padding: 10px 15px; font-size: 0.8rem;">🛡️ 추천</button>
-              <button class="analysis-tab" data-id="600_std" style="padding: 10px 15px; font-size: 0.8rem;">600</button>
-              <button class="analysis-tab" data-id="800_std" style="padding: 10px 15px; font-size: 0.8rem;">800</button>
-              <button class="analysis-tab" data-id="800_lea" style="padding: 10px 15px; font-size: 0.8rem;">800레더</button>
-              <button class="analysis-tab" data-id="1000_lea" style="padding: 10px 15px; font-size: 0.8rem;">1000레더</button>
-              <button class="analysis-tab" data-id="1200_lea" style="padding: 10px 15px; font-size: 0.8rem;">1200레더</button>
-            </div>
+          <div style="flex: 1; min-width: 380px; width: 0;">
 
             <div id="activeReportGrid" style="margin-bottom: 25px;">
               <!-- Active Detail Card injected here via JS -->
