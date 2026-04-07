@@ -1717,8 +1717,66 @@ HASNOL 하스놀 드림`;
     if (downloadPdfBtn) {
         downloadPdfBtn.addEventListener('click', async () => {
             const result = await buildPDFBlob(downloadPdfBtn);
-            if (!result) return;
             downloadBlobFile(result.blob, result.fileName);
+        });
+    }
+
+    // ☁️ 하단 액션바 직접 구글 드라이브 저장 버튼
+    const saveToGoogleDriveBtn = document.getElementById('saveToGoogleDriveBtn');
+    if (saveToGoogleDriveBtn) {
+        saveToGoogleDriveBtn.addEventListener('click', async () => {
+             // Share 모달의 드라이브 버튼과 동일한 로직 사용하되, PDF부터 실시간 생성
+             const result = await buildPDFBlob(saveToGoogleDriveBtn);
+             if (!result) return;
+             _pdfBlob = result.blob;
+             _pdfFileName = result.fileName;
+
+             if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                 downloadBlobFile(_pdfBlob, _pdfFileName);
+                 showToast('⚠️ Apps Script URL 미설정 → PDF를 다운로드했습니다.');
+                 return;
+             }
+
+             // 저장 중 상태 표시
+             const originalHtml = saveToGoogleDriveBtn.innerHTML;
+             saveToGoogleDriveBtn.innerHTML = '⏳ 시스템 전송 중...';
+             showToast('☁️ 구글 드라이브에 저장 중...');
+
+             try {
+                 const saveResult = await saveToDrive(_pdfBlob, _pdfFileName);
+                 if (saveResult.success) {
+                     showToast(`✅ 드라이브 저장 완료!\n📄 ${saveResult.fileName}`);
+                     if (saveResult.fileUrl) {
+                         setTimeout(() => {
+                             if (confirm('✅ 드라이브 저장 완료!\n\n저장된 파일을 바로 열어볼까요?')) {
+                                 window.open(saveResult.fileUrl, '_blank');
+                             }
+                         }, 500);
+                     }
+                 } else {
+                     throw new Error(saveResult.message || '저장 실패');
+                 }
+             } catch (err) {
+                 console.error('Drive 저장 오류:', err);
+                 downloadBlobFile(_pdfBlob, _pdfFileName);
+                 showToast('⚠️ 드라이브 연결 실패 → PDF를 다운로드했습니다.\n' + err.message);
+             } finally {
+                 saveToGoogleDriveBtn.innerHTML = originalHtml;
+             }
+        });
+    }
+
+    // ✉️ 하단 액션바 직접 이메일 발송 버튼
+    const openEmailComposeBtn = document.getElementById('openEmailComposeBtn');
+    if (openEmailComposeBtn) {
+        openEmailComposeBtn.addEventListener('click', async () => {
+             const result = await buildPDFBlob(openEmailComposeBtn);
+             if (!result) return;
+             _pdfBlob = result.blob;
+             _pdfFileName = result.fileName;
+
+             downloadBlobFile(_pdfBlob, _pdfFileName);
+             setTimeout(openEmailComposeModal, 600);
         });
     }
 });

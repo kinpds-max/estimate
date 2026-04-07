@@ -240,6 +240,27 @@ input[type="checkbox"] {
   background: #e8e8ed;
 }
 
+.btn-drive {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.btn-drive:hover {
+  background: #c8e6c9;
+  transform: scale(1.01);
+}
+
+.btn-email {
+  background: linear-gradient(135deg, #1a73e8, #0d47a1);
+  color: white;
+}
+
+.btn-email:hover {
+  background: linear-gradient(135deg, #1557b0, #0a3375);
+  transform: scale(1.01);
+}
+
 /* AI Sketch Area - Precise & Light */
 .sketch-container {
   width: 100%;
