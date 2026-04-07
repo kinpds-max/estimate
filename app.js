@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const customerNameIpt = document.getElementById('customerName');
     const customerPhoneIpt = document.getElementById('customerPhone');
+    const customerEmailIpt = document.getElementById('customerEmail');
     const customerRegionIpt = document.getElementById('customerRegion');
     const customerAptIpt = document.getElementById('customerApt');
     const customerSizeIpt = document.getElementById('customerSize');
@@ -958,7 +959,74 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateEstimate = function() {
         baseCalculateEstimate();
         updateFullPricingComparison();
+        updateContractEstimateSummary();
     };
+
+    // --- Contract Estimate Summary Injection ---
+    function updateContractEstimateSummary() {
+        const summaryBox = document.getElementById('contractEstimateSummary');
+        if (!summaryBox) return;
+
+        // Gather customer info
+        const name = document.getElementById('customerName')?.value || '미입력';
+        const phone = document.getElementById('customerPhone')?.value || '미입력';
+        const region = document.getElementById('customerRegion')?.value || '미입력';
+        const apt = document.getElementById('customerApt')?.value || '미입력';
+        const size = document.getElementById('customerSize')?.value || '미입력';
+        const scope = document.getElementById('customerScope')?.value || '미입력';
+        const dateVal = document.getElementById('estimateDate')?.value || new Date().toISOString().slice(0, 10);
+        const sizeLabel = matSizeSel?.value ? `${matSizeSel.value}mm` : '-';
+        const typeLabel = matTypeSel?.value === 'leather' ? '레더' : '표준';
+
+        // Clone the comparison summary table HTML
+        const compTable = document.getElementById('comparisonSummaryTable');
+        const compTableHTML = compTable ? compTable.innerHTML : '';
+
+        // Clone the active detail card HTML
+        const detailCard = document.getElementById('activeReportGrid');
+        const detailCardHTML = detailCard ? detailCard.innerHTML : '';
+
+        summaryBox.style.display = 'block';
+        summaryBox.innerHTML = `
+            <!-- 발행 정보 + 고객 정보 -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:30px; border:1px solid #eef2ff; border-radius:16px; padding:20px; background:#f8faff;">
+              <div>
+                <div style="font-size:0.7rem; font-weight:800; color:var(--primary); letter-spacing:0.1em; margin-bottom:10px;">📋 견적 발행 정보</div>
+                <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                  <tr><td style="color:#888; padding:4px 0; width:80px;">발행일</td><td style="font-weight:700;">${dateVal}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">선택 규격</td><td style="font-weight:700;">${sizeLabel} ${typeLabel}</td></tr>
+                </table>
+              </div>
+              <div>
+                <div style="font-size:0.7rem; font-weight:800; color:var(--primary); letter-spacing:0.1em; margin-bottom:10px;">👤 고객 정보</div>
+                <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                  <tr><td style="color:#888; padding:4px 0; width:80px;">고객명</td><td style="font-weight:700;">${name}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">연락처</td><td style="font-weight:600;">${phone}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">지역</td><td style="font-weight:600;">${region}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">시설명</td><td style="font-weight:600;">${apt}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">평형</td><td style="font-weight:600;">${size}</td></tr>
+                  <tr><td style="color:#888; padding:4px 0;">시공범위</td><td style="font-weight:600;">${scope}</td></tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- 비교 견적표 -->
+            <div style="margin-bottom:30px;">
+              <div style="font-size:0.7rem; font-weight:800; color:var(--primary); letter-spacing:0.1em; margin-bottom:12px; padding:8px 14px; background:var(--primary); color:white; border-radius:8px; display:inline-block;">📊 규격별 비교 견적표</div>
+              <div style="border:1px solid #eef2ff; border-radius:12px; overflow:hidden;">
+                ${compTableHTML}
+              </div>
+            </div>
+
+            <!-- 선택 규격 상세 견적 -->
+            <div>
+              <div style="font-size:0.7rem; font-weight:800; letter-spacing:0.1em; margin-bottom:12px; padding:8px 14px; background:#1a1a2e; color:white; border-radius:8px; display:inline-block;">💎 선택 규격 상세 견적 (${sizeLabel} ${typeLabel})</div>
+              <div style="border:1px solid #eef2ff; border-radius:12px; overflow:hidden; padding:20px;">
+                ${detailCardHTML}
+              </div>
+            </div>
+        `;
+    }
 
     // Helper to get computed price for any size/type combination
     function getComputedPrice(sizeIn, typeIn, spacesArray) {
@@ -1394,7 +1462,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     });
 
-    // 📧 이메일
+    // 📧 이메일 (기존 일반 공유)
     document.getElementById('shareEmailBtn').addEventListener('click', () => {
         closeModal();
         if (!_pdfBlob || !_pdfFileName) return;
@@ -1406,6 +1474,223 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('✅ PDF가 저장되었습니다.\n이메일 작성이 완료되면 파일을 첨부해 주세요.');
         }, 800);
     });
+
+    // ============================================================
+    // ☁️ 구글 드라이브 자동 저장 (Apps Script Web App 연동)
+    // ============================================================
+    // 👇 Apps Script 배포 후 여기에 웹 앱 URL 붙여넣기
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX30ZifNhyNVp0bZ_a8Hv-Qs9oHNl7oOReSBqcwjvUfxbbQxNRFx9ClqX6iSV6XZde/exec';
+
+    async function saveToDrive(blob, fileName) {
+        // Blob → Base64 변환
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async () => {
+                try {
+                    // "data:application/pdf;base64," 접두사 제거
+                    const base64 = reader.result.split(',')[1];
+                    const customerName = document.getElementById('customerName')?.value || '고객';
+
+                    const response = await fetch(APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            pdf: base64,
+                            fileName: fileName,
+                            customerName: customerName
+                        })
+                    });
+
+                    const result = await response.json();
+                    resolve(result);
+                } catch (err) {
+                    reject(err);
+                }
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    const shareDriveBtn = document.getElementById('shareDriveBtn');
+    if (shareDriveBtn) {
+        shareDriveBtn.addEventListener('click', async () => {
+            closeModal();
+            if (!_pdfBlob || !_pdfFileName) return;
+
+            // Apps Script URL이 설정되지 않은 경우 폴백 처리
+            if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                downloadBlobFile(_pdfBlob, _pdfFileName);
+                showToast('⚠️ Apps Script URL 미설정 → PDF를 다운로드했습니다.\n설정 방법은 google_apps_script.gs 파일을 참고하세요.');
+                return;
+            }
+
+            // 저장 중 상태 표시
+            shareDriveBtn.querySelector('span:first-child').textContent = '⏳';
+            showToast('☁️ 구글 드라이브에 저장 중...');
+
+            try {
+                const result = await saveToDrive(_pdfBlob, _pdfFileName);
+
+                if (result.success) {
+                    // 성공 토스트
+                    showToast(`✅ 드라이브 저장 완료!\n📄 ${result.fileName}`);
+
+                    // 저장된 파일 링크 열기 (선택)
+                    if (result.fileUrl) {
+                        setTimeout(() => {
+                            if (confirm('✅ 드라이브 저장 완료!\n\n저장된 파일을 바로 열어볼까요?')) {
+                                window.open(result.fileUrl, '_blank');
+                            }
+                        }, 500);
+                    }
+                } else {
+                    throw new Error(result.message || '저장 실패');
+                }
+            } catch (err) {
+                console.error('Drive 저장 오류:', err);
+                // 실패 시 폴백: 로컬 다운로드
+                downloadBlobFile(_pdfBlob, _pdfFileName);
+                showToast('⚠️ 드라이브 연결 실패 → PDF를 다운로드했습니다.\n' + err.message);
+            } finally {
+                shareDriveBtn.querySelector('span:first-child').textContent = '☁️';
+            }
+        });
+    }
+
+    // ✉️ 고객에게 견적서 이메일 작성 전용 버튼
+    const shareCustomerEmailBtn = document.getElementById('shareCustomerEmailBtn');
+    const emailComposeModal = document.getElementById('emailComposeModal');
+    const closeEmailModal = document.getElementById('closeEmailModal');
+    const emailToIpt = document.getElementById('emailTo');
+    const emailSubjectIpt = document.getElementById('emailSubject');
+    const emailBodyTxt = document.getElementById('emailBody');
+    const copyEmailBodyBtn = document.getElementById('copyEmailBodyBtn');
+    const sendEmailBtn = document.getElementById('sendEmailBtn');
+
+    function buildEmailContent() {
+        const name = customerNameIpt?.value || '고객';
+        const phone = customerPhoneIpt?.value || '';
+        const region = customerRegionIpt?.value || '';
+        const apt = customerAptIpt?.value || '';
+        const size = customerSizeIpt?.value || '';
+        const scope = customerScopeIpt?.value || '';
+        const date = estimateDateIpt?.value || new Date().toLocaleDateString('ko-KR');
+
+        // 현재 선택된 탭의 견적 금액 가져오기
+        const priceEl = document.querySelector('#activeReportGrid .card [style*="1.8rem"]');
+        const totalPrice = priceEl ? priceEl.textContent.trim() : '산출 견적 참조';
+
+        const subject = `[HASNOL 하스놀] ${name} 고객님 맞춤 견적서 안내`;
+
+        const body = `안녕하세요, ${name} 고객님.
+
+하스놀(HASNOL)입니다. 문의해주신 TPU 프리미엄 바닥매트 시공 견적서를 발송해 드립니다.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+📋 견적 기본 정보
+━━━━━━━━━━━━━━━━━━━━━━━
+• 고객명: ${name}
+• 연락처: ${phone || '미기입'}
+• 시공 지역: ${[region, apt].filter(Boolean).join(' ') || '미기입'}
+• 평형/규모: ${size || '미기입'}
+• 시공 범위: ${scope || '미기입'}
+• 견적 발행일: ${date}
+• 최종 견적 금액: ${totalPrice}원 (부가세 포함)
+━━━━━━━━━━━━━━━━━━━━━━━
+
+상세 견적 내용은 첨부된 PDF 파일을 확인해 주세요.
+
+📌 안내 사항:
+- 최종 정산은 실제 시공 완료 후 현장 확인 수량 기준입니다.
+- 견적 유효기간은 발행일로부터 7일입니다.
+- 궁금하신 사항은 언제든지 연락주세요.
+
+☎ 고객 상담: 1660-1195
+🏢 주소: 경기도 김포시 누산리 399-6
+🌐 홈페이지: www.hasnol.kr
+
+감사합니다.
+HASNOL 하스놀 드림`;
+
+        return { subject, body, to: customerEmailIpt?.value || '' };
+    }
+
+    function openEmailComposeModal() {
+        const { subject, body, to } = buildEmailContent();
+        if (emailToIpt) emailToIpt.value = to;
+        if (emailSubjectIpt) emailSubjectIpt.value = subject;
+        if (emailBodyTxt) emailBodyTxt.value = body;
+        if (emailComposeModal) {
+            emailComposeModal.style.display = 'flex';
+        }
+    }
+
+    function closeEmailComposeModal() {
+        if (emailComposeModal) emailComposeModal.style.display = 'none';
+    }
+
+    if (shareCustomerEmailBtn) {
+        shareCustomerEmailBtn.addEventListener('click', async () => {
+            closeModal();
+            // PDF 다운로드 먼저
+            if (_pdfBlob && _pdfFileName) {
+                downloadBlobFile(_pdfBlob, _pdfFileName);
+                setTimeout(openEmailComposeModal, 600);
+            } else {
+                // PDF가 아직 생성 안된 경우 경고 없이 모달만 열기
+                openEmailComposeModal();
+            }
+        });
+    }
+
+    if (closeEmailModal) closeEmailModal.addEventListener('click', closeEmailComposeModal);
+    if (emailComposeModal) {
+        emailComposeModal.addEventListener('click', (e) => {
+            if (e.target === emailComposeModal) closeEmailComposeModal();
+        });
+    }
+
+    // 본문 복사
+    if (copyEmailBodyBtn) {
+        copyEmailBodyBtn.addEventListener('click', () => {
+            const text = emailBodyTxt?.value || '';
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => showToast('📋 본문이 클립보드에 복사되었습니다!'));
+            } else {
+                emailBodyTxt.select();
+                document.execCommand('copy');
+                showToast('📋 본문이 복사되었습니다!');
+            }
+        });
+    }
+
+    // 이메일 앱 열기
+    if (sendEmailBtn) {
+        sendEmailBtn.addEventListener('click', () => {
+            const to = encodeURIComponent(emailToIpt?.value || '');
+            const subject = encodeURIComponent(emailSubjectIpt?.value || '');
+            const body = encodeURIComponent(emailBodyTxt?.value || '');
+            window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+            showToast('✉️ 이메일 앱이 열립니다. PDF 파일을 첨부해 주세요!');
+            setTimeout(closeEmailComposeModal, 1200);
+        });
+    }
+
+    // 🔔 토스트 알림 헬퍼
+    function showToast(message) {
+        let toast = document.getElementById('hasnol-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'hasnol-toast';
+            toast.style.cssText = 'position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:rgba(30,30,30,0.92); color:white; padding:14px 24px; border-radius:14px; font-size:0.88rem; font-weight:600; z-index:99999; max-width:88vw; text-align:center; line-height:1.5; box-shadow:0 8px 32px rgba(0,0,0,0.25); backdrop-filter:blur(8px); transition:opacity 0.3s;';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.style.opacity = '1';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => { toast.style.display = 'none'; }, 300); }, 3000);
+    }
 
     // 📠 모바일 팩스
     document.getElementById('shareFaxBtn').addEventListener('click', () => {

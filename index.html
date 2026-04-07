@@ -60,6 +60,10 @@
             <input type="text" id="customerPhone" placeholder="예: 010-1234-5678">
           </div>
           <div class="form-group" style="margin-bottom: 0;">
+            <label for="customerEmail" style="font-size: 0.85rem;">📧 고객 이메일</label>
+            <input type="email" id="customerEmail" placeholder="예: customer@email.com">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
             <label for="customerRegion" style="font-size: 0.85rem;">지역</label>
             <input type="text" id="customerRegion" placeholder="예: 서울 강남구">
           </div>
@@ -578,6 +582,11 @@
         <p style="margin-top: 10px; font-size: 0.8rem; color: #888; font-weight: 500;">본 문서는 정품 HASNOL TPU 매트 시공에 따른 품질 보증 및 표준 계약 내용을 포함합니다.</p>
       </div>
 
+      <!-- ========== 견적 요약 [JS에 의해 자동 주입] ========== -->
+      <div id="contractEstimateSummary" style="max-width:900px; margin:0 auto 50px; text-align:left; display:none;">
+        <!-- JS가 calculateEstimate() 완료 후 이 영역을 채웁니다 -->
+      </div>
+
       <div class="info-section" style="max-width: 900px; margin: 0 auto;">
         
         <!-- SECTION 1: Precautions -->
@@ -712,12 +721,66 @@
           <span style="font-weight:700;">모바일 팩스</span>
           <small>실물을 팩스로 전송</small>
         </button>
+        <button id="shareDriveBtn" class="share-opt-btn" style="background:#e8f5e9;">
+          <span style="font-size:2rem;">☁️</span>
+          <span style="font-weight:700;">구글 드라이브</span>
+          <small>드라이브에 보관</small>
+        </button>
       </div>
+      <!-- 고객 이메일 전송 전용 버튼 -->
+      <button id="shareCustomerEmailBtn" style="width:100%; padding:16px; background:linear-gradient(135deg, #1a73e8, #0d47a1); border:none; border-radius:14px; cursor:pointer; font-size:0.95rem; font-weight:700; color:white; margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <span style="font-size:1.3rem;">✉️</span> 고객에게 견적서 이메일 작성
+      </button>
       <button id="closeShareModal" style="width:100%; padding:14px; background:#f5f5f7; border:none; border-radius:14px; cursor:pointer; font-size:0.95rem; font-weight:600; color:#666;">닫기</button>
     </div>
     <p style="text-align: center; color: #aaa; margin-top: 40px; font-size: 0.8rem; border-top: 1px solid #ddd; padding-top: 20px;">
       모든 소유권은 하맘컨텐츠에 있습니다.
     </p>
+  </div>
+
+  <!-- ✉️ 고객 이메일 작성 모달 -->
+  <div id="emailComposeModal" class="no-print" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; width:100%; max-width:560px; border-radius:24px; padding:32px; box-shadow:0 20px 60px rgba(0,0,0,0.3); max-height:90vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+        <div>
+          <h3 style="margin:0; font-size:1.2rem; font-weight:800; color:#1a1a1e;">✉️ 고객 이메일 작성</h3>
+          <p style="margin:4px 0 0; font-size:0.8rem; color:#999;">견적서 PDF와 함께 이메일을 전송합니다</p>
+        </div>
+        <button id="closeEmailModal" style="border:none; background:#f5f5f7; border-radius:50%; width:36px; height:36px; font-size:1.1rem; cursor:pointer; color:#666;">✕</button>
+      </div>
+
+      <!-- 받는 사람 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-weight:700; font-size:0.85rem; color:#333; display:block; margin-bottom:6px;">📨 받는 사람 (고객 이메일)</label>
+        <input type="email" id="emailTo" placeholder="customer@email.com" style="width:100%; padding:12px 16px; border:1.5px solid #e0e0e0; border-radius:12px; font-size:0.95rem; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#e0e0e0'">
+      </div>
+
+      <!-- 제목 -->
+      <div style="margin-bottom:16px;">
+        <label style="font-weight:700; font-size:0.85rem; color:#333; display:block; margin-bottom:6px;">📌 이메일 제목</label>
+        <input type="text" id="emailSubject" style="width:100%; padding:12px 16px; border:1.5px solid #e0e0e0; border-radius:12px; font-size:0.95rem; box-sizing:border-box; transition:border 0.2s;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#e0e0e0'">
+      </div>
+
+      <!-- 본문 -->
+      <div style="margin-bottom:20px;">
+        <label style="font-weight:700; font-size:0.85rem; color:#333; display:block; margin-bottom:6px;">📝 이메일 본문</label>
+        <textarea id="emailBody" rows="10" style="width:100%; padding:14px 16px; border:1.5px solid #e0e0e0; border-radius:12px; font-size:0.88rem; line-height:1.7; box-sizing:border-box; resize:vertical; font-family:inherit; transition:border 0.2s;" onfocus="this.style.borderColor='#1a73e8'" onblur="this.style.borderColor='#e0e0e0'"></textarea>
+      </div>
+
+      <!-- PDF 첨부 안내 -->
+      <div style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:12px; padding:12px 16px; margin-bottom:20px; font-size:0.82rem; color:#2e7d32; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.4rem;">📎</span>
+        <div>
+          <strong>PDF 자동 다운로드 후 첨부</strong><br>
+          이메일 앱이 열리면 다운로드된 PDF 파일을 첨부해 주세요.
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <button id="copyEmailBodyBtn" style="padding:14px; background:#f5f5f7; border:none; border-radius:12px; cursor:pointer; font-size:0.9rem; font-weight:600; color:#333;">📋 본문 복사</button>
+        <button id="sendEmailBtn" style="padding:14px; background:linear-gradient(135deg, #1a73e8, #0d47a1); border:none; border-radius:12px; cursor:pointer; font-size:0.9rem; font-weight:700; color:white;">✉️ 이메일 앱 열기</button>
+      </div>
+    </div>
   </div>
 
   <style>
