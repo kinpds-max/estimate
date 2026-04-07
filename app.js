@@ -1141,7 +1141,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p style="font-size: 0.65rem; color: #888;">${cert.body}</p>
             </a>
         `).join('');
-        lucide.createIcons();
+        try {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        } catch(e) { console.warn('lucide error:', e); }
     }
 
     function updateDynamicReviews(selectedSize, selectedType) {
@@ -1779,4 +1783,6 @@ HASNOL 하스놀 드림`;
              setTimeout(openEmailComposeModal, 600);
         });
     }
+
+    console.log("✅ HASNOL App.js successfully loaded (Version with Hotfix)");
 });
